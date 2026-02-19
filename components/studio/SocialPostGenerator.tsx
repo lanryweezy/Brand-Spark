@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useCurrentBrand } from '../../hooks/useCurrentBrand';
-import * as geminiService from '../../services/geminiService';
+import { ai } from '../../services/aiProvider';
 import { SocialPlatform, ToneOfVoice } from '../../types';
 import AIToolContainer from './common/AIToolContainer';
 import Button from '../ui/Button';
@@ -12,9 +12,11 @@ import CopyButton from './common/CopyButton';
 import SaveToCalendarButton from './common/SaveToCalendarButton';
 import AISuggestionButton from '../ui/AISuggestionButton';
 import SaveToAssetsButton from './common/SaveToAssetsButton';
+import { useToast } from '../../hooks/useToast';
 
 const SocialPostGenerator: React.FC = () => {
   const { currentBrand } = useCurrentBrand();
+  const { addToast } = useToast();
   const [platform, setPlatform] = useState<SocialPlatform>(SocialPlatform.LinkedIn);
   const [product, setProduct] = useState('');
   const [audience, setAudience] = useState('');
@@ -42,7 +44,7 @@ const SocialPostGenerator: React.FC = () => {
     setResult('');
 
     try {
-      const post = await geminiService.generateSocialPost({
+      const post = await ai.generateSocialPost({
         brandId: currentBrand.id,
         platform,
         product,
@@ -50,6 +52,7 @@ const SocialPostGenerator: React.FC = () => {
         tone
       });
       setResult(post);
+      addToast('Social post generated.', 'success');
     } catch (err: any) {
       setError(err.toString());
     } finally {
@@ -77,7 +80,16 @@ const SocialPostGenerator: React.FC = () => {
           required
         />
         <AISuggestionButton 
-            prompt="Suggest a creative product announcement idea for a social media post."
+            prompt={`<task>Suggest a creative product announcement</task>
+<brand>
+name: ${currentBrand?.name}
+description: ${currentBrand?.description}
+audience: ${currentBrand?.audience}
+baseTone: ${currentBrand?.baseTone}
+</brand>
+<platform>${platform}</platform>
+<constraints>Short, scannable, platform-appropriate</constraints>
+<format>single-sentence idea</format>`}
             onSuggestion={setProduct}
         />
       </div>

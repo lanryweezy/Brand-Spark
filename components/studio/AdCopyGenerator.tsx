@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useCurrentBrand } from '../../hooks/useCurrentBrand';
-import * as geminiService from '../../services/geminiService';
+import { ai } from '../../services/aiProvider';
 import { ToneOfVoice } from '../../types';
 import AIToolContainer from './common/AIToolContainer';
 import Button from '../ui/Button';
@@ -12,9 +12,11 @@ import CopyButton from './common/CopyButton';
 import SaveToCalendarButton from './common/SaveToCalendarButton';
 import AISuggestionButton from '../ui/AISuggestionButton';
 import SaveToAssetsButton from './common/SaveToAssetsButton';
+import { useToast } from '../../hooks/useToast';
 
 const AdCopyGenerator: React.FC = () => {
   const { currentBrand } = useCurrentBrand();
+  const { addToast } = useToast();
   const [product, setProduct] = useState('');
   const [sellingPoints, setSellingPoints] = useState('');
   const [tone, setTone] = useState<ToneOfVoice>(ToneOfVoice.Witty);
@@ -40,13 +42,14 @@ const AdCopyGenerator: React.FC = () => {
     setResult('');
 
     try {
-      const copy = await geminiService.generateAdCopy({
+      const copy = await ai.generateAdCopy({
           brandId: currentBrand.id,
           product,
           sellingPoints,
           tone
       });
       setResult(copy);
+      addToast('Ad copy generated.', 'success');
     } catch (err: any) {
       setError(err.toString());
     } finally {
@@ -74,7 +77,14 @@ const AdCopyGenerator: React.FC = () => {
           required
         />
         <AISuggestionButton 
-            prompt={`Suggest 3 key selling points for a product called "${product}".`}
+            prompt={`<task>Suggest 3 key selling points</task>
+<brand>
+name: ${currentBrand?.name}
+description: ${currentBrand?.description}
+</brand>
+<product>${product}</product>
+<constraints>Concise, benefit-focused, customer language</constraints>
+<format>bullet list</format>`}
             onSuggestion={setSellingPoints}
         />
       </div>

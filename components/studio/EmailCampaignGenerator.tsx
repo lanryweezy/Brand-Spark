@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useCurrentBrand } from '../../hooks/useCurrentBrand';
-import * as geminiService from '../../services/geminiService';
+import { ai } from '../../services/aiProvider';
 import { EmailContent, ToneOfVoice } from '../../types';
 import AIToolContainer from './common/AIToolContainer';
 import Button from '../ui/Button';
@@ -12,9 +12,11 @@ import CopyButton from './common/CopyButton';
 import SaveToCalendarButton from './common/SaveToCalendarButton';
 import AISuggestionButton from '../ui/AISuggestionButton';
 import SaveToAssetsButton from './common/SaveToAssetsButton';
+import { useToast } from '../../hooks/useToast';
 
 const EmailCampaignGenerator: React.FC = () => {
   const { currentBrand } = useCurrentBrand();
+  const { addToast } = useToast();
   const [goal, setGoal] = useState('');
   const [productInfo, setProductInfo] = useState('');
   const [tone, setTone] = useState<ToneOfVoice>(ToneOfVoice.Professional);
@@ -40,13 +42,14 @@ const EmailCampaignGenerator: React.FC = () => {
     setResult(null);
 
     try {
-      const emailContent = await geminiService.generateEmailCampaign({
+      const emailContent = await ai.generateEmailCampaign({
           brandId: currentBrand.id,
           goal,
           productInfo,
           tone
       });
       setResult(emailContent);
+      addToast('Email content generated.', 'success');
     } catch (err: any) {
       setError(err.toString());
     } finally {
@@ -66,7 +69,15 @@ const EmailCampaignGenerator: React.FC = () => {
           required
         />
         <AISuggestionButton
-            prompt="Suggest a clear goal for a marketing email."
+            prompt={`<task>Suggest a clear, compelling email campaign goal</task>
+<brand>
+name: ${currentBrand?.name}
+description: ${currentBrand?.description}
+audience: ${currentBrand?.audience}
+baseTone: ${currentBrand?.baseTone}
+</brand>
+<constraints>Measurable, aligned with brand, action-oriented</constraints>
+<format>short goal phrase</format>`}
             onSuggestion={setGoal}
         />
       </div>

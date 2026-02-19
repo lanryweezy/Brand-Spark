@@ -1,14 +1,16 @@
 
 import React, { useState } from 'react';
 import { useCurrentBrand } from '../../hooks/useCurrentBrand';
-import * as geminiService from '../../services/geminiService';
+import { ai } from '../../services/aiProvider';
 import { SEOKeyword } from '../../types';
 import AIToolContainer from './common/AIToolContainer';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
+import { useToast } from '../../hooks/useToast';
 
 const SEOKeywordGenerator: React.FC = () => {
   const { currentBrand } = useCurrentBrand();
+  const { addToast } = useToast();
   const [topic, setTopic] = useState('');
   
   const [result, setResult] = useState<SEOKeyword[]>([]);
@@ -26,8 +28,9 @@ const SEOKeywordGenerator: React.FC = () => {
     setResult([]);
 
     try {
-      const keywords = await geminiService.generateSEOKeywords({ brandId: currentBrand.id, topic });
+      const keywords = await ai.generateSEOKeywords({ brandId: currentBrand.id, topic });
       setResult(keywords);
+      addToast('SEO keywords generated.', 'success');
     } catch (err: any) {
       setError(err.toString());
     } finally {

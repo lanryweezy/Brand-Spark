@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import AIStudio from './components/AIStudio';
+import DemoPage from './components/DemoPage';
 import { View, NavStructureItem } from './types';
 import { SparklesIcon, LayoutDashboardIcon, BuildingStorefrontIcon, CalendarDaysIcon, MegaphoneIcon, RocketLaunchIcon, UserGroupIcon, ChartBarIcon, CpuChipIcon, LinkIcon, FolderIcon, BriefcaseIcon, CurrencyDollarIcon, CogIcon } from './constants';
 import BrandSettings from './components/BrandSettings';
@@ -19,11 +20,15 @@ import TeamManagement from './components/TeamManagement';
 import { ToastContainer } from './components/ui/Toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import Financials from './components/Financials';
+import DemoModeBanner from './components/ui/DemoModeBanner';
+import GuideModal from './components/ui/GuideModal';
 
 const SIDEBAR_COLLAPSED_KEY = 'brandspark_sidebar_collapsed';
 
 const App: React.FC = () => {
-  const [activeView, setActiveView] = useState<View>(View.Dashboard);
+  const [activeView, setActiveView] = useState<View>(
+    (import.meta as any).env?.VITE_DEMO_MODE === 'true' ? View.Demo : View.Dashboard
+  );
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
   });
@@ -32,8 +37,22 @@ const App: React.FC = () => {
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(isSidebarCollapsed));
   }, [isSidebarCollapsed]);
 
+  const [showGuide, setShowGuide] = useState(() => {
+    try {
+      return localStorage.getItem('seen_onboarding_v1') !== 'true';
+    } catch {
+      return false;
+    }
+  });
+  const handleCloseGuide = () => {
+    try { localStorage.setItem('seen_onboarding_v1', 'true'); } catch {}
+    setShowGuide(false);
+  };
+
   const renderActiveView = () => {
     switch (activeView) {
+      case View.Demo:
+        return <DemoPage />;
       case View.AIStudio:
         return <AIStudio />;
       case View.BrandSettings:
@@ -67,6 +86,7 @@ const App: React.FC = () => {
   };
 
   const navStructure: NavStructureItem[] = [
+    { type: 'link', name: 'Demo', view: View.Demo, icon: <SparklesIcon /> },
     { type: 'link', name: 'Dashboard', view: View.Dashboard, icon: <LayoutDashboardIcon /> },
     { type: 'heading', name: 'Agency' },
     { type: 'link', name: 'Client Hub', view: View.Clients, icon: <BriefcaseIcon /> },
@@ -91,6 +111,7 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-slate-50 font-sans">
+      <DemoModeBanner />
       <Sidebar 
           activeView={activeView} 
           setActiveView={setActiveView} 
@@ -119,6 +140,7 @@ const App: React.FC = () => {
           </div>
       </div>
       <ToastContainer />
+      <GuideModal isOpen={showGuide} onClose={handleCloseGuide} />
     </div>
   );
 };

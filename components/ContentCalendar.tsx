@@ -33,9 +33,10 @@ type SelectedItem = {
 
 interface ContentCalendarProps {
     setActiveView: (view: View) => void;
+    disableAIAssist?: boolean;
 }
 
-const ContentCalendar: React.FC<ContentCalendarProps> = ({ setActiveView }) => {
+const ContentCalendar: React.FC<ContentCalendarProps> = ({ setActiveView, disableAIAssist }) => {
     const { brandEvents, addEvent, deleteEvent } = useCalendar();
     const { brandTasks, addTask, deleteTask } = useTasks();
     const { brandProjects } = useProjects();
@@ -210,10 +211,12 @@ const ContentCalendar: React.FC<ContentCalendarProps> = ({ setActiveView }) => {
 
     const calendarActions = (
         <div className="flex items-center gap-2">
-             <Button variant="secondary" onClick={handleAIAssist} isLoading={isLoadingSuggestions} disabled={!currentBrand}>
-                <SparklesIcon className="w-4 h-4 mr-2" />
-                AI Assist
-            </Button>
+            {!disableAIAssist && (
+                <Button variant="secondary" onClick={handleAIAssist} isLoading={isLoadingSuggestions} disabled={!currentBrand}>
+                    <SparklesIcon className="w-4 h-4 mr-2" />
+                    AI Assist
+                </Button>
+            )}
             <span className="bg-white border border-slate-300 p-1 rounded-md flex items-center">
                 <button onClick={() => setViewMode('month')} className={`px-3 py-1 text-sm rounded ${viewMode === 'month' ? 'bg-brand-primary text-white shadow' : 'text-slate-600'}`}>Month</button>
                 <button onClick={() => setViewMode('agenda')} className={`px-3 py-1 text-sm rounded ${viewMode === 'agenda' ? 'bg-brand-primary text-white shadow' : 'text-slate-600'}`}>Agenda</button>
@@ -227,7 +230,8 @@ const ContentCalendar: React.FC<ContentCalendarProps> = ({ setActiveView }) => {
     );
 
     const AgendaView = () => {
-        const sortedItems = Object.entries(allItemsByDate)
+        const entries = Object.entries(allItemsByDate) as [string, CalendarItem[]][];
+        const sortedItems = entries
             .map(([date, items]) => ({ date, items }))
             .filter(entry => {
                 const d = new Date(entry.date + 'T00:00:00');
@@ -271,11 +275,10 @@ const ContentCalendar: React.FC<ContentCalendarProps> = ({ setActiveView }) => {
             <div className="grid grid-cols-7 grid-rows-5 gap-px bg-slate-200">
                 {days.map(d => {
                     const dateKey = d.toISOString().split('T')[0];
-                    const todaysItems = singleDayItemsByDate[dateKey] || [];
+                    const todaysItems: SelectedItem[] = singleDayItemsByDate[dateKey] || [];
                     const isCurrentMonth = d.getMonth() === currentDate.getMonth();
                     const isToday = new Date().toISOString().split('T')[0] === dateKey;
-                    
-                     const todaysCampaigns = brandCampaigns.filter(c => {
+                     const todaysCampaigns: Campaign[] = brandCampaigns.filter(c => {
                         const start = new Date(c.startDate + "T00:00:00");
                         const end = new Date(c.endDate + "T00:00:00");
                         return d >= start && d <= end;

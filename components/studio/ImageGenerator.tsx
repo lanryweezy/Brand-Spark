@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useCurrentBrand } from '../../hooks/useCurrentBrand';
-import * as geminiService from '../../services/geminiService';
+import { ai } from '../../services/aiProvider';
 import AIToolContainer from './common/AIToolContainer';
 import Button from '../ui/Button';
 import Textarea from '../ui/Textarea';
@@ -28,7 +28,21 @@ const ImageGenerator: React.FC = () => {
     setResult('');
 
     try {
-      const imageUrl = await geminiService.generateMarketingImage({ brandId: currentBrand.id, prompt });
+      // Use POML-style structured prompt to guide image generation
+      const imageUrl = await ai.generateText({
+        brandId: currentBrand.id,
+        prompt: `<task>
+Generate a marketing image concept (describe clearly)
+</task>
+<brand>
+name: ${currentBrand?.name}
+description: ${currentBrand?.description}
+audience: ${currentBrand?.audience}
+baseTone: ${currentBrand?.baseTone}
+</brand>
+<constraints>Clear visual description, brand-aligned, concise</constraints>
+<format>short description</format>`
+      });
       setResult(imageUrl);
     } catch (err: any)
      {

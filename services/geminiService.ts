@@ -7,6 +7,67 @@ import {
 } from '../types';
 
 const API_BASE_URL = '/api'; // This will be proxied to your Python backend in a production setup.
+const USE_MOCKS = (import.meta as any).env?.VITE_USE_MOCKS === 'true';
+
+// Lightweight mock responder used in Demo mode to avoid network calls.
+function mockResponse(endpoint: string, body: any): any {
+  switch (endpoint) {
+    case '/generate/text':
+      return { generated_text: `Demo response for: ${body?.prompt || 'N/A'}` };
+    case '/generate/social-post':
+      return `Demo social post for ${body?.platform || 'platform'} about ${body?.product || 'product'} in ${body?.tone || 'neutral'} tone.`;
+    case '/generate/ad-copy':
+      return `Demo ad copy highlighting: ${body?.sellingPoints || 'benefits'}.`;
+    case '/generate/blog-ideas':
+      return [{ title: `Demo ideas on ${body?.topic || 'your topic'}`, outline: 'Intro, Points, CTA' }];
+    case '/generate/image':
+      return { imageUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB...' };
+    case '/generate/seo-keywords':
+      return [{ keyword: body?.topic || 'demo', volume: 100, difficulty: 20 }];
+    case '/generate/email-campaign':
+      return { subject: `Demo: ${body?.goal || 'Campaign'}`, body: 'This is a demo email body.' };
+    case '/generate/repurpose':
+      return 'Demo repurposed content.';
+    case '/generate/tags':
+      return ['demo', 'brandspark', 'ai'];
+    case '/generate/suggestion':
+      return 'Demo suggestion text.';
+    case '/generate/competitor-analysis':
+      return { analysis: 'Demo competitor analysis.' };
+    case '/generate/calendar-suggestions':
+      return (body?.emptyDates || []).map((d: string) => ({ date: d, suggestion: 'Post a demo update' }));
+    case '/generate/automation-workflow':
+      return { name: 'Demo Workflow', steps: [{ name: 'Demo step', action: 'notify' }] };
+    case '/generate/vet-influencer':
+      return { analysis: 'Demo influencer vetting result.' };
+    case '/generate/integration-insights':
+      return { insight: 'Demo integration insights.' };
+    case '/generate/financial-summary':
+      return { summary: 'Demo financial summary.' };
+    case '/generate/invoice-email':
+      return { subject: 'Demo invoice subject', body: 'Demo invoice email body.' };
+    case '/generate/client-report':
+      return { report: 'Demo client report.' };
+    case '/generate/project-tasks':
+      return [{ title: 'Demo Task', description: 'Do something demo' }];
+    case '/generate/goal-breakdown':
+      return [{ text: 'Demo goal breakdown item' }];
+    case '/generate/data-qa':
+      return 'Demo data answer.';
+    case '/generate/full-report':
+      return 'Demo full report content.';
+    case '/generate/brainstorm-ideas':
+      return [{ idea: `Demo idea about ${body?.topic || 'topic'}` }];
+    case '/generate/automation-recipes':
+      return [{ name: 'Demo Recipe', description: 'A helpful demo automation.' }];
+    case '/generate/influencer-outreach':
+      return { subject: 'Demo Outreach', body: 'Hello influencer, demo message.' };
+    case '/generate/campaign-brief':
+      return { summary: 'Demo campaign brief' };
+    default:
+      return {};
+  }
+}
 
 // Helper function to handle API responses
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -18,6 +79,10 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 async function post<T>(endpoint: string, body: any): Promise<T> {
+  if (USE_MOCKS) {
+    // Return deterministic mock data in Demo mode without any network calls.
+    return Promise.resolve(mockResponse(endpoint, body) as T);
+  }
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -30,6 +95,9 @@ async function post<T>(endpoint: string, body: any): Promise<T> {
 // =================================
 // AI Generation API
 // =================================
+
+export const generateText = (data: { brandId: string, prompt: string }) =>
+  post<{ generated_text: string }>('/generate/text', data).then(res => res.generated_text);
 
 export const generateSocialPost = (data: { brandId: string, platform: SocialPlatform, product: string, audience: string, tone: ToneOfVoice }) =>
   post<string>('/generate/social-post', data);

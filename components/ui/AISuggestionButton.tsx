@@ -2,8 +2,7 @@
 import React, { useState } from 'react';
 import Button from './Button';
 import { LightBulbIcon } from '../../constants';
-// Fix: Import geminiService for AI-powered suggestions.
-import * as geminiService from '../../services/geminiService';
+import { ai } from '../../services/aiProvider';
 import { useToast } from '../../hooks/useToast';
 
 interface AISuggestionButtonProps {
@@ -19,8 +18,7 @@ const AISuggestionButton: React.FC<AISuggestionButtonProps> = ({ prompt, onSugge
     const handleClick = async () => {
         setIsLoading(true);
         try {
-            // Fix: Use geminiService to generate suggestions.
-            const suggestion = await geminiService.generateSuggestion({ prompt });
+            const suggestion = await ai.generateText({ brandId: '', prompt });
             onSuggestion(suggestion);
         } catch (error) {
             console.error("Failed to get AI suggestion:", error);

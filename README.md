@@ -8,11 +8,33 @@ View your app in AI Studio: https://ai.studio/apps/drive/167tyIp1Q87_WGyEqiyYocd
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
+**Prerequisites:** Node.js
 
+### 🚀 Run in Demo Mode (Recommended First)
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+The demo mode uses mock data and does not require a backend or API keys.
+
+1.  **Install dependencies:**
+    `npm install`
+2.  **Create a `.env.local` file** at the project root with the following content:
+    ```
+    VITE_DEMO_MODE=true
+    VITE_USE_MOCKS=true
+    ```
+3.  **Run the app:**
+    `npm run dev`
+
+The app will open in your browser with the Demo page active.
+
+### ⚡️ Run with Live AI Features
+
+This mode connects to the AI backend and requires a Gemini API key.
+
+1.  **Install dependencies:**
+    `npm install`
+2.  **Create a `.env.local` file** and set your Gemini API key:
+    ```
+    VITE_GEMINI_API_KEY=your-gemini-api-key-here
+    ```
+3.  **Run the app:**
+    `npm run dev`

@@ -1,6 +1,19 @@
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+
+// Sentry (frontend)
+import * as Sentry from '@sentry/react';
+const SENTRY_DSN = (import.meta as any).env?.VITE_SENTRY_DSN;
+if (SENTRY_DSN) {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    tracesSampleRate: Number((import.meta as any).env?.VITE_SENTRY_TRACES_SAMPLE_RATE ?? 0.1),
+    environment: (import.meta as any).env?.VITE_ENVIRONMENT ?? 'development',
+    release: (import.meta as any).env?.VITE_APP_VERSION ?? '0.1.0',
+  });
+}
 import OnboardingPage from './components/OnboardingPage';
 import LoginPage from './components/LoginPage';
 import { BrandProvider } from './hooks/useCurrentBrand';

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useCurrentBrand } from '../../hooks/useCurrentBrand';
-import * as geminiService from '../../services/geminiService';
+import { ai } from '../../services/aiProvider';
 import { BlogIdea } from '../../types';
 import AIToolContainer from './common/AIToolContainer';
 import Button from '../ui/Button';
@@ -10,9 +10,11 @@ import CopyButton from './common/CopyButton';
 import AISuggestionButton from '../ui/AISuggestionButton';
 import SaveToCalendarButton from './common/SaveToCalendarButton';
 import SaveToAssetsButton from './common/SaveToAssetsButton';
+import { useToast } from '../../hooks/useToast';
 
 const BlogIdeaGenerator: React.FC = () => {
   const { currentBrand } = useCurrentBrand();
+  const { addToast } = useToast();
   const [topic, setTopic] = useState('');
   
   const [result, setResult] = useState<BlogIdea[]>([]);
@@ -30,8 +32,9 @@ const BlogIdeaGenerator: React.FC = () => {
     setResult([]);
 
     try {
-      const ideas = await geminiService.generateBlogIdeas({ brandId: currentBrand.id, topic });
+      const ideas = await ai.generateBlogIdeas({ brandId: currentBrand.id, topic });
       setResult(ideas);
+      addToast('Blog ideas generated.', 'success');
     } catch (err: any) {
       setError(err.toString());
     } finally {
@@ -51,7 +54,14 @@ const BlogIdeaGenerator: React.FC = () => {
           required
         />
         <AISuggestionButton 
-            prompt={`Suggest a broad blog topic for a company with the description: "${currentBrand?.description}"`}
+            prompt={`<task>Suggest a broad blog topic</task>
+<brand>
+name: ${currentBrand?.name}
+description: ${currentBrand?.description}
+audience: ${currentBrand?.audience}
+</brand>
+<constraints>Top-of-funnel, evergreen, high-interest</constraints>
+<format>short topic line</format>`}
             onSuggestion={setTopic}
         />
       </div>

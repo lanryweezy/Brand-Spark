@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 export enum Role {
     Admin = 'Admin',
     Member = 'Member',
@@ -137,6 +138,7 @@ export interface Goal {
 }
 
 export enum View {
+  Demo = 'DEMO',
   Dashboard = 'DASHBOARD',
   AIStudio = 'AI_STUDIO',
   BrandSettings = 'BRAND_SETTINGS',
@@ -168,14 +170,14 @@ export interface BlogIdea {
 export interface NavItem {
     name: string;
     view: View;
-    icon: React.ReactNode;
+    icon: ReactNode;
 }
 
 export interface NavStructureItem {
     type: 'link' | 'heading';
     name: string;
     view?: View;
-    icon?: React.ReactNode;
+    icon?: ReactNode;
 }
 
 export interface SEOKeyword {

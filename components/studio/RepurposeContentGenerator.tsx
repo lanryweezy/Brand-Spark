@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useCurrentBrand } from '../../hooks/useCurrentBrand';
 // Fix: Import geminiService for AI-powered content repurposing.
-import * as geminiService from '../../services/geminiService';
+import { ai } from '../../services/aiProvider';
 import AIToolContainer from './common/AIToolContainer';
 import Button from '../ui/Button';
 import Select from '../ui/Select';
@@ -53,10 +53,22 @@ const RepurposeContentGenerator: React.FC = () => {
                 : selectedAsset.content;
             
             // Fix: Use geminiService to repurpose content.
-            const repurposed = await geminiService.repurposeContent({
+            const repurposed = await ai.generateText({
                 brandId: currentBrand.id,
-                originalContent,
-                targetFormat
+                prompt: `<task>
+Repurpose content into ${targetFormat}
+</task>
+<brand>
+name: ${currentBrand?.name}
+description: ${currentBrand?.description}
+audience: ${currentBrand?.audience}
+baseTone: ${currentBrand?.baseTone}
+</brand>
+<content>
+${originalContent}
+</content>
+<constraints>Maintain brand tone, keep core message, fit target format</constraints>
+<format>${targetFormat}</format>`
             });
             setResult(repurposed);
         } catch (err: any) {

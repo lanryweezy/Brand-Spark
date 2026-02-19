@@ -5,7 +5,7 @@ import { useCurrentBrand } from '../../../hooks/useCurrentBrand';
 import { GeneratedContentType, Asset } from '../../../types';
 import Button from '../../ui/Button';
 import { useToast } from '../../../hooks/useToast';
-import * as geminiService from '../../../services/geminiService';
+import { ai } from '../../../services/aiProvider';
 
 interface SaveToAssetsButtonProps {
     name: string;
@@ -33,7 +33,7 @@ const SaveToAssetsButton: React.FC<SaveToAssetsButtonProps> = ({ name, type, con
         let tags: string[] = [];
         try {
             if (type !== 'Image') { // Tagging is best for text content
-                tags = await geminiService.generateAssetTags({ content, type });
+                tags = await ai.generateTags({ content, type });
             }
         } catch (error) {
             console.error("Failed to generate tags:", error);
