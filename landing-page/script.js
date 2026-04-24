@@ -99,6 +99,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Configure Application URL based on environment
+// For local testing use http://localhost:3000
+const APP_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:3000'
+    : 'https://app.brandspark.com';
+
 // Hero Form Submission
 document.getElementById('heroForm').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -116,7 +122,7 @@ document.getElementById('heroForm').addEventListener('submit', function(e) {
         plan: 'scale'
     });
     
-    window.location.href = `https://app.brandspark.com/register?${params}`;
+    window.location.href = `${APP_URL}/register?${params}`;
 });
 
 // Pricing Plan Selection
@@ -130,7 +136,7 @@ function startTrial(plan = 'scale') {
     
     if (email) params.append('email', email);
     
-    window.location.href = `https://app.brandspark.com/register?${params}`;
+    window.location.href = `${APP_URL}/register?${params}`;
 }
 
 // Simple analytics tracking
