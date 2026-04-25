@@ -19,8 +19,8 @@ from marshmallow import Schema, fields, validate, ValidationError
 
 # Support running as a script (python backend/app.py) and as a module (python -m backend.app)
 try:
-    from backend.blueprints.generate import generate_bp  # type: ignore
-except Exception:
+    from blueprints.generate import generate_bp  # type: ignore
+except ImportError:
     from .blueprints.generate import generate_bp  # type: ignore
 
 load_dotenv()
@@ -388,7 +388,10 @@ def get_campaigns():
     } for campaign in campaigns])
 
 # Jobs scaffold: Celery tasks endpoints
-from backend.tasks import celery_app
+try:
+    from tasks import celery_app
+except ImportError:
+    from .tasks import celery_app
 
 @app.route('/api/jobs/submit_full_report', methods=['POST'])
 @jwt_required()

@@ -5,7 +5,10 @@ import google.generativeai as genai
 
 from marshmallow import Schema, fields, ValidationError
 
-from backend.models import Brand, User
+try:
+    from models import Brand, User
+except ImportError:
+    from ..models import Brand, User
 
 # Configure the Gemini API key
 try:
