@@ -18,7 +18,7 @@ except Exception as e:
     print(f"Error configuring Gemini API: {e}")
     model = None
 
-generate_bp = Blueprint("generate_bp", __name__, url_prefix="/api/generate")
+generate_bp = Blueprint("generate_bp", __name__, url_prefix="/generate")
 
 # Validation Schemas
 class SocialPostSchema(Schema):
