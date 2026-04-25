@@ -19,8 +19,8 @@ from marshmallow import Schema, fields, validate, ValidationError
 
 # Support running as a script (python backend/app.py) and as a module (python -m backend.app)
 try:
-    from backend.blueprints.generate import generate_bp  # type: ignore
-except Exception:
+    from blueprints.generate import generate_bp  # type: ignore
+except ImportError:
     from .blueprints.generate import generate_bp  # type: ignore
 
 load_dotenv()
@@ -189,7 +189,7 @@ class LoginSchema(Schema):
     password = fields.String(required=True, validate=validate.Length(min=6))
 
 # Authentication Routes
-@app.route('/api/auth/register', methods=['POST'])
+@app.route('/auth/register', methods=['POST'])
 def register():
     try:
         data = request.get_json() or {}
@@ -240,7 +240,7 @@ def register():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/auth/login', methods=['POST'])
+@app.route('/auth/login', methods=['POST'])
 def login():
     try:
         data = request.get_json() or {}
@@ -278,14 +278,14 @@ def login():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/auth/refresh', methods=['POST'])
+@app.route('/auth/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh():
     current_user_id = get_jwt_identity()
     new_token = create_access_token(identity=current_user_id)
     return jsonify({'access_token': new_token})
 
-@app.route('/api/auth/me', methods=['GET'])
+@app.route('/auth/me', methods=['GET'])
 @jwt_required()
 def get_current_user():
     current_user_id = get_jwt_identity()
@@ -304,7 +304,7 @@ def get_current_user():
     })
 
 # Brand Routes
-@app.route('/api/brands', methods=['GET'])
+@app.route('/brands', methods=['GET'])
 @jwt_required()
 def get_brands():
     current_user_id = get_jwt_identity()
@@ -323,7 +323,7 @@ def get_brands():
         'created_at': brand.created_at.isoformat()
     } for brand in brands])
 
-@app.route('/api/brands', methods=['POST'])
+@app.route('/brands', methods=['POST'])
 @jwt_required()
 def create_brand():
     try:
@@ -364,7 +364,7 @@ def create_brand():
         return jsonify({'error': str(e)}), 500
 
 # Campaign Routes
-@app.route('/api/campaigns', methods=['GET'])
+@app.route('/campaigns', methods=['GET'])
 @jwt_required()
 def get_campaigns():
     current_user_id = get_jwt_identity()
@@ -388,9 +388,12 @@ def get_campaigns():
     } for campaign in campaigns])
 
 # Jobs scaffold: Celery tasks endpoints
-from backend.tasks import celery_app
+try:
+    from tasks import celery_app
+except ImportError:
+    from .tasks import celery_app
 
-@app.route('/api/jobs/submit_full_report', methods=['POST'])
+@app.route('/jobs/submit_full_report', methods=['POST'])
 @jwt_required()
 def submit_full_report():
     current_user_id = get_jwt_identity()
@@ -401,7 +404,7 @@ def submit_full_report():
     job = celery_app.send_task('tasks.generate_full_report', args=[current_user_id, brand_id])
     return jsonify({'job_id': job.id}), 202
 
-@app.route('/api/jobs/<job_id>', methods=['GET'])
+@app.route('/jobs/<job_id>', methods=['GET'])
 @jwt_required()
 def job_status(job_id):
     res = celery_app.AsyncResult(job_id)
@@ -410,12 +413,12 @@ def job_status(job_id):
     return jsonify({'job_id': job_id, 'state': state, 'info': info})
 
 # Version endpoint
-@app.route('/api/version', methods=['GET'])
+@app.route('/version', methods=['GET'])
 def version():
     return jsonify({'version': os.getenv('APP_VERSION', '0.1.0')})
 
 # Readiness check (includes DB connectivity)
-@app.route('/api/ready', methods=['GET'])
+@app.route('/ready', methods=['GET'])
 def ready_check():
     try:
         db.session.execute(text('SELECT 1'))
@@ -424,7 +427,7 @@ def ready_check():
         return jsonify({'status': 'degraded', 'error': str(e)}), 500
 
 # Health check
-@app.route('/api/health', methods=['GET'])
+@app.route('/health', methods=['GET'])
 def health_check():
     return jsonify({'status': 'healthy', 'timestamp': datetime.utcnow().isoformat()})
 
