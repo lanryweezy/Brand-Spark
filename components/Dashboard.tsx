@@ -152,11 +152,16 @@ const Dashboard: React.FC<{setActiveView: (view: View) => void}> = ({setActiveVi
         show: { y: 0, opacity: 1 },
     };
 
-    const QuickStartButton: React.FC<{title: string, subtitle: string, onClick: () => void}> = ({ title, subtitle, onClick }) => (
+    const QuickStartButton: React.FC<{title: string, subtitle: string, icon: React.ReactNode, onClick: () => void}> = ({ title, subtitle, icon, onClick }) => (
         <motion.div variants={itemVariants}>
-            <button onClick={onClick} className="w-full text-left p-4 bg-slate-50 rounded-lg transition-all duration-200 hover:bg-white hover:shadow-md hover:-translate-y-1 border border-transparent hover:border-slate-200">
-                <h4 className="font-bold text-brand-text">{title}</h4>
-                <p className="text-sm text-slate-500">{subtitle}</p>
+            <button onClick={onClick} className="w-full group flex items-start gap-4 text-left p-5 bg-white/50 backdrop-blur-sm rounded-xl transition-all duration-300 hover:bg-white hover:shadow-xl hover:shadow-brand-primary/10 hover:-translate-y-1 border border-slate-100 hover:border-brand-primary/20">
+                <div className="p-2.5 rounded-lg bg-slate-50 text-slate-400 group-hover:bg-brand-primary/10 group-hover:text-brand-primary transition-colors">
+                    {icon}
+                </div>
+                <div>
+                    <h4 className="font-bold text-brand-text group-hover:text-brand-primary transition-colors">{title}</h4>
+                    <p className="text-sm text-slate-500 mt-0.5">{subtitle}</p>
+                </div>
             </button>
         </motion.div>
     );
@@ -230,25 +235,30 @@ const Dashboard: React.FC<{setActiveView: (view: View) => void}> = ({setActiveVi
                                     initial="hidden"
                                     animate="show"
                                  >
-                                    <QuickStartButton title="Generate Content" subtitle="Go to the AI Studio" onClick={() => setActiveView(View.AIStudio)} />
-                                    <QuickStartButton title="Plan a Campaign" subtitle="Open the Campaign Planner" onClick={() => setActiveView(View.CampaignPlanner)} />
-                                    <QuickStartButton title="View Calendar" subtitle="See your content schedule" onClick={() => setActiveView(View.ContentCalendar)} />
+                                    <QuickStartButton title="Generate Content" subtitle="Go to the AI Studio" icon={<SparklesIcon className="w-6 h-6" />} onClick={() => setActiveView(View.AIStudio)} />
+                                    <QuickStartButton title="Plan a Campaign" subtitle="Open the Campaign Planner" icon={<RocketLaunchIcon className="w-6 h-6" />} onClick={() => setActiveView(View.CampaignPlanner)} />
+                                    <QuickStartButton title="View Calendar" subtitle="See your content schedule" icon={<FolderIcon className="w-6 h-6" />} onClick={() => setActiveView(View.ContentCalendar)} />
                                 </motion.div>
                             </div>
                             <div>
                                 <h2 className="text-2xl font-bold text-brand-text mb-4">Recent Activity</h2>
-                                <Card className="p-4">
+                                <Card className="p-0 overflow-hidden border border-slate-100 shadow-sm">
                                     {recentActivity.length > 0 ? (
-                                         <ul className="space-y-3">
-                                            {recentActivity.map(item => (
-                                                <li key={item.id} className="text-sm">
-                                                    <span className="font-semibold text-brand-text">{item.name}</span>
-                                                    <span className="text-slate-500"> was created. ({item.type})</span>
+                                         <ul className="divide-y divide-slate-100">
+                                            {recentActivity.map((item, i) => (
+                                                <li key={item.id} className="p-4 flex items-center gap-4 hover:bg-slate-50 transition-colors">
+                                                    <div className={`p-2 rounded-lg ${item.type === 'asset' ? 'bg-blue-50 text-blue-500' : 'bg-green-50 text-green-500'}`}>
+                                                        {item.type === 'asset' ? <MegaphoneIcon className="w-5 h-5" /> : <RocketLaunchIcon className="w-5 h-5" />}
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-semibold text-brand-text text-sm block">{item.name}</span>
+                                                        <span className="text-slate-400 text-xs mt-0.5 block">{new Date(item.date).toLocaleDateString()}</span>
+                                                    </div>
                                                 </li>
                                             ))}
                                         </ul>
                                     ) : (
-                                        <p className="text-sm text-slate-500 text-center py-4">No recent activity.</p>
+                                        <p className="text-sm text-slate-500 text-center py-8">No recent activity.</p>
                                     )}
                                 </Card>
                             </div>

@@ -2,7 +2,8 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useCurrentBrand } from '../hooks/useCurrentBrand';
 import { BrandProfile } from '../types';
-import { ChevronDownIcon, PlusIcon } from '../constants';
+import { PlusIcon } from '../constants';
+import { ChevronDown } from 'lucide-react';
 import Button from './ui/Button';
 
 const BrandLogo: React.FC<{ logoUrl?: string; alt: string }> = ({ logoUrl, alt }) => {
@@ -56,7 +57,7 @@ const BrandSelector: React.FC = () => {
         <div ref={dropdownRef} className="relative w-64">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex items-center justify-between bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="w-full flex items-center justify-between bg-white border border-slate-200 rounded-xl shadow-sm px-4 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary"
             >
                 {currentBrand ? (
                     <span className="flex items-center truncate">
@@ -66,27 +67,27 @@ const BrandSelector: React.FC = () => {
                 ) : (
                     <span>Select a Brand</span>
                 )}
-                <ChevronDownIcon className={`w-5 h-5 ml-2 text-gray-400 transition-transform flex-shrink-0 ${isOpen ? 'transform rotate-180' : ''}`} />
+                <ChevronDown className={`w-4 h-4 ml-2 text-slate-400 transition-transform duration-300 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {isOpen && (
-                <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200">
-                    <div className="p-2">
+                <div className="absolute z-10 mt-2 w-full bg-white shadow-xl rounded-xl border border-slate-100 overflow-hidden transform origin-top animate-in fade-in zoom-in-95 duration-200">
+                    <div className="p-2 border-b border-slate-100 bg-slate-50/50">
                         <input
                             type="text"
                             placeholder="Search brands..."
-                            className="w-full px-3 py-2 text-sm text-gray-900 bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                            className="w-full px-3 py-2 text-sm text-slate-900 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-all"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             autoFocus
                         />
                     </div>
-                    <ul className="max-h-60 overflow-y-auto">
+                    <ul className="max-h-60 overflow-y-auto py-1">
                         {filteredBrands.map((brand: BrandProfile) => (
                             <li key={brand.id}>
                                 <button
                                     onClick={() => { setCurrentBrand(brand); setIsOpen(false); }}
-                                    className="w-full flex items-center p-3 text-left text-sm text-gray-700 hover:bg-indigo-50"
+                                    className={`w-full flex items-center p-3 text-left text-sm transition-colors ${currentBrand?.id === brand.id ? 'bg-brand-primary/5 text-brand-primary font-medium' : 'text-slate-700 hover:bg-slate-50'}`}
                                 >
                                     <BrandLogo logoUrl={brand.logo} alt={brand.name} />
                                     <span className="truncate">{brand.name}</span>
@@ -94,17 +95,17 @@ const BrandSelector: React.FC = () => {
                             </li>
                         ))}
                     </ul>
-                    <div className="p-2 border-t border-gray-200">
+                    <div className="p-2 border-t border-slate-100 bg-slate-50/50">
                         <div className="flex items-center gap-2">
                             <input
                                 type="text"
                                 placeholder="Add new brand..."
-                                className="flex-grow px-3 py-2 text-sm text-gray-900 bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                                className="flex-grow px-3 py-2 text-sm text-slate-900 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-all"
                                 value={newBrandName}
                                 onChange={(e) => setNewBrandName(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleAddNewBrand()}
                             />
-                            <Button onClick={handleAddNewBrand} size="sm"><PlusIcon /></Button>
+                            <Button onClick={handleAddNewBrand} size="sm" className="rounded-lg px-2"><PlusIcon className="w-4 h-4" /></Button>
                         </div>
                     </div>
                 </div>

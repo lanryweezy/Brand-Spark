@@ -2,7 +2,8 @@
 import React from 'react';
 import { useCurrentBrand } from '../hooks/useCurrentBrand';
 import { View, NavStructureItem } from '../types';
-import { SparklesIcon, ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from '../constants';
+import { SparklesIcon } from '../constants';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface SidebarProps {
   activeView: View;
@@ -35,20 +36,23 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, navStructu
             setActiveView(item.view);
         }
       }}
-      className={`group relative flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200
+      className={`group relative flex items-center px-4 py-3 mb-1 text-sm rounded-xl transition-all duration-300
         ${isCollapsed ? 'justify-center' : ''}
         ${
           activeView === item.view
-            ? 'bg-slate-700/80 text-white font-semibold'
-            : 'text-slate-400 hover:bg-slate-800/60 hover:text-white font-medium'
+            ? 'bg-gradient-to-r from-brand-primary/20 to-brand-primary/5 text-brand-primary font-semibold border border-brand-primary/20 shadow-sm shadow-brand-primary/10'
+            : 'text-slate-400 hover:bg-slate-800/80 hover:text-white font-medium border border-transparent'
         }`}
     >
-      <span className="w-6 h-6 flex items-center justify-center flex-shrink-0">{item.icon}</span>
+      <span className={`w-6 h-6 flex items-center justify-center flex-shrink-0 transition-transform duration-300 ${activeView === item.view ? 'scale-110' : 'group-hover:scale-110'}`}>{item.icon}</span>
       {!isCollapsed && <span className="ml-3 flex-1 whitespace-nowrap">{item.name}</span>}
       {isCollapsed && (
           <span className="absolute left-full ml-4 w-auto p-2 min-w-max rounded-md shadow-md text-white bg-slate-800 border border-slate-700 text-xs font-bold transition-all duration-100 scale-0 origin-left group-hover:scale-100 z-20">
               {item.name}
           </span>
+      )}
+      {!isCollapsed && activeView === item.view && (
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-brand-primary rounded-r-full" />
       )}
     </a>
   );
@@ -106,7 +110,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, navStructu
             className="w-full flex items-center justify-center mt-2 px-4 py-2 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 transition-colors"
             title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
         >
-            {isCollapsed ? <ChevronDoubleRightIcon className="h-5 w-5"/> : <ChevronDoubleLeftIcon className="h-5 w-5"/>}
+            {isCollapsed ? <ChevronRight className="h-5 w-5"/> : <ChevronLeft className="h-5 w-5"/>}
         </button>
       </div>
     </aside>

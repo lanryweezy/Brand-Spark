@@ -10,7 +10,7 @@ import time
 
 # Configuration
 FRONTEND_URL = "http://localhost:3000"
-BACKEND_URL = "http://localhost:5000/api"
+BACKEND_URL = "http://localhost:8000"
 LANDING_URL = "http://localhost:8080"
 
 def test_backend_health():

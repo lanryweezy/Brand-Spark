@@ -5,7 +5,10 @@ import google.generativeai as genai
 
 from marshmallow import Schema, fields, ValidationError
 
-from backend.models import Brand, User
+try:
+    from models import Brand, User
+except ImportError:
+    from ..models import Brand, User
 
 # Configure the Gemini API key
 try:
@@ -15,7 +18,7 @@ except Exception as e:
     print(f"Error configuring Gemini API: {e}")
     model = None
 
-generate_bp = Blueprint("generate_bp", __name__, url_prefix="/api/generate")
+generate_bp = Blueprint("generate_bp", __name__, url_prefix="/generate")
 
 # Validation Schemas
 class SocialPostSchema(Schema):

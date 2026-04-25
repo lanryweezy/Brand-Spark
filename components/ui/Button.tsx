@@ -17,18 +17,18 @@ const Button: React.FC<ButtonProps> = ({
     ...props 
 }) => {
 
-  const baseClasses = 'inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 transform hover:-translate-y-px active:translate-y-0';
+  const baseClasses = 'inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 transform active:scale-95 shadow-sm hover:shadow-md';
 
   const sizeClasses = {
-    sm: 'px-3 py-1.5 text-xs rounded-md',
-    md: 'px-5 py-2.5 text-sm',
-    lg: 'px-7 py-3.5 text-base'
+    sm: 'px-4 py-2 text-xs rounded-lg',
+    md: 'px-6 py-3 text-sm',
+    lg: 'px-8 py-4 text-base'
   };
 
   const variantClasses = {
-    primary: `text-white shadow-subtle hover:shadow-medium bg-gradient-to-r from-brand-primary to-purple-600 focus:ring-brand-primary`,
-    secondary: `bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 focus:ring-brand-primary`,
-    ghost: `bg-transparent text-slate-600 hover:bg-slate-100 focus:ring-brand-primary shadow-none`
+    primary: `text-white shadow-brand-primary/25 hover:shadow-brand-primary/40 hover:-translate-y-0.5 bg-gradient-to-r from-brand-primary via-brand-primary to-brand-secondary bg-size-200 hover:bg-pos-100 focus:ring-brand-primary border border-transparent`,
+    secondary: `bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 focus:ring-slate-200 hover:-translate-y-0.5`,
+    ghost: `bg-transparent text-slate-600 hover:bg-slate-100 focus:ring-slate-200 shadow-none hover:shadow-none`
   };
   
   const spinnerColor = variant === 'primary' ? 'text-white' : 'text-brand-primary';

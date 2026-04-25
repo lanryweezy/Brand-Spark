@@ -7,14 +7,17 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 
 const Textarea: React.FC<TextareaProps> = ({ label, id, ...props }) => {
   return (
-    <div>
-        <label htmlFor={id} className="block text-sm font-medium text-slate-700 mb-1.5">{label}</label>
-        <textarea
-            id={id}
-            rows={4}
-            className="block w-full rounded-md border-slate-300 bg-white shadow-sm focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/40 sm:text-sm p-2.5 transition"
-            {...props}
-        />
+    <div className="relative group">
+        <label htmlFor={id} className="block text-sm font-semibold text-slate-700 mb-1.5 transition-colors group-focus-within:text-brand-primary">{label}</label>
+        <div className="relative">
+            <textarea
+                id={id}
+                rows={4}
+                className="block w-full rounded-xl border border-slate-200 bg-slate-50/50 shadow-sm focus:border-brand-primary focus:bg-white focus:ring-4 focus:ring-brand-primary/10 hover:border-brand-primary/50 sm:text-sm p-3.5 transition-all duration-300 ease-out"
+                {...props}
+            />
+            <div className="absolute inset-0 rounded-xl border border-brand-primary opacity-0 transition-opacity duration-300 pointer-events-none group-focus-within:opacity-20"></div>
+        </div>
     </div>
   );
 };

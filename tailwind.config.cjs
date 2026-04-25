@@ -34,6 +34,13 @@ module.exports = {
         medium: "0 8px 24px rgba(0, 0, 0, 0.07)",
         lifted: "0 10px 30px -5px rgba(0, 0, 0, 0.09), 0 4px 6px -4px rgba(0, 0, 0, 0.06)",
       },
+      backgroundSize: {
+        'size-200': '200% 200%',
+      },
+      backgroundPosition: {
+        'pos-0': '0% 0%',
+        'pos-100': '100% 100%',
+      },
     },
   },
   plugins: [],
