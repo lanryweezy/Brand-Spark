@@ -26,39 +26,54 @@ const GoalCard: React.FC<{ goal: Goal }> = ({ goal }) => {
     const isCompleted = progress === 100 && goal.subTasks.length > 0;
 
     return (
-        <Card>
-            <div className="flex justify-between items-start gap-2">
-                <div className="flex items-center gap-2 flex-grow min-w-0">
-                    <h3 className="font-bold text-lg text-brand-text truncate">{goal.title}</h3>
+        <Card className="relative overflow-hidden group">
+            <div className="flex justify-between items-start gap-4">
+                <div className="flex items-center gap-3 flex-grow min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                        <CheckBadgeIcon className="w-5 h-5 text-indigo-500" />
+                    </div>
+                    <h3 className="font-bold text-lg text-slate-800 truncate">{goal.title}</h3>
                     {isCompleted && (
-                        <span className="flex-shrink-0 flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-brand-accent text-white">
-                            <CheckBadgeIcon className="w-4 h-4 mr-1"/>
-                            Completed!
+                        <span className="flex-shrink-0 flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-emerald-400 to-emerald-500 text-white shadow-sm">
+                            <CheckBadgeIcon className="w-3.5 h-3.5 mr-1"/>
+                            Completed
                         </span>
                     )}
                 </div>
-                <button onClick={() => deleteGoal(goal.id)} className="flex-shrink-0 p-1 text-slate-400 hover:text-red-500 rounded-full"><TrashIcon className="w-4 h-4" /></button>
+                <button onClick={() => deleteGoal(goal.id)} className="flex-shrink-0 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors">
+                    <TrashIcon className="w-4 h-4" />
+                </button>
             </div>
-            <div className="mt-4">
-                <div className="flex justify-between text-xs font-medium text-slate-500 mb-1">
-                    <span>Progress</span>
-                    <span>{completedTasks} / {goal.subTasks.length} Completed</span>
+            <div className="mt-6">
+                <div className="flex justify-between text-xs font-semibold text-slate-500 mb-2">
+                    <span className="uppercase tracking-wider">Progress</span>
+                    <span>{Math.round(progress)}% ({completedTasks}/{goal.subTasks.length})</span>
                 </div>
-                <div className="w-full bg-slate-200 rounded-full h-2">
-                    <div className="bg-brand-primary h-2 rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
+                <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                    <div
+                        className="bg-gradient-to-r from-brand-primary to-indigo-400 h-2.5 rounded-full transition-all duration-700 ease-out"
+                        style={{ width: `${progress}%` }}
+                    />
                 </div>
             </div>
-            <ul className="mt-4 space-y-2">
+            <ul className="mt-6 space-y-3">
                 {goal.subTasks.map(st => (
-                    <li key={st.id} className="flex items-center">
-                        <input
-                            type="checkbox"
-                            id={`subtask-${st.id}`}
-                            checked={st.completed}
-                            onChange={() => toggleSubTask(goal.id, st.id)}
-                            className="h-4 w-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary"
-                        />
-                        <label htmlFor={`subtask-${st.id}`} className={`ml-3 text-sm ${st.completed ? 'text-slate-400 line-through' : 'text-slate-700'}`}>
+                    <li key={st.id} className="flex items-start group/item">
+                        <div className="flex items-center h-5 mt-0.5">
+                            <input
+                                type="checkbox"
+                                id={`subtask-${st.id}`}
+                                checked={st.completed}
+                                onChange={() => toggleSubTask(goal.id, st.id)}
+                                className="h-4.5 w-4.5 rounded text-brand-primary border-slate-300 focus:ring-brand-primary focus:ring-offset-2 transition-colors cursor-pointer"
+                            />
+                        </div>
+                        <label
+                            htmlFor={`subtask-${st.id}`}
+                            className={`ml-3 text-sm leading-relaxed cursor-pointer transition-all duration-200 ${
+                                st.completed ? 'text-slate-400 line-through' : 'text-slate-700 group-hover/item:text-slate-900'
+                            }`}
+                        >
                             {st.text}
                         </label>
                     </li>
@@ -152,11 +167,21 @@ const Dashboard: React.FC<{setActiveView: (view: View) => void}> = ({setActiveVi
         show: { y: 0, opacity: 1 },
     };
 
-    const QuickStartButton: React.FC<{title: string, subtitle: string, onClick: () => void}> = ({ title, subtitle, onClick }) => (
+    const QuickStartButton: React.FC<{title: string, subtitle: string, icon: React.ReactNode, onClick: () => void}> = ({ title, subtitle, icon, onClick }) => (
         <motion.div variants={itemVariants}>
-            <button onClick={onClick} className="w-full text-left p-4 bg-slate-50 rounded-lg transition-all duration-200 hover:bg-white hover:shadow-md hover:-translate-y-1 border border-transparent hover:border-slate-200">
-                <h4 className="font-bold text-brand-text">{title}</h4>
-                <p className="text-sm text-slate-500">{subtitle}</p>
+            <button
+                onClick={onClick}
+                className="w-full text-left p-4 bg-white rounded-xl transition-all duration-300 hover:shadow-xl hover:shadow-brand-primary/5 hover:-translate-y-1 border border-slate-100 hover:border-brand-primary/20 flex items-center gap-4 group"
+            >
+                <div className="w-12 h-12 rounded-lg bg-indigo-50/50 flex items-center justify-center text-indigo-500 group-hover:bg-brand-primary group-hover:text-white transition-colors duration-300">
+                    <div className="w-6 h-6">
+                        {icon}
+                    </div>
+                </div>
+                <div>
+                    <h4 className="font-bold text-slate-800 group-hover:text-brand-primary transition-colors">{title}</h4>
+                    <p className="text-sm text-slate-500 mt-0.5">{subtitle}</p>
+                </div>
             </button>
         </motion.div>
     );
@@ -213,9 +238,15 @@ const Dashboard: React.FC<{setActiveView: (view: View) => void}> = ({setActiveVi
                                     ))}
                                 </motion.div>
                             ) : (
-                                <div className="text-center py-16 bg-slate-50 rounded-lg">
-                                    <h3 className="text-lg font-semibold">No goals set yet.</h3>
-                                    <p className="text-slate-500 mt-1">Set a high-level goal to get started.</p>
+                                <div className="text-center py-16 px-6 bg-white border border-dashed border-slate-300 rounded-2xl flex flex-col items-center">
+                                    <div className="w-16 h-16 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mb-4">
+                                        <LightBulbIcon className="w-8 h-8" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-slate-800">No goals set yet.</h3>
+                                    <p className="text-slate-500 mt-2 max-w-sm mb-6">Set a high-level goal and our AI will break it down into actionable sub-tasks.</p>
+                                    <Button onClick={() => setIsGoalModalOpen(true)}>
+                                        <PlusIcon className="mr-2" /> Add Your First Goal
+                                    </Button>
                                 </div>
                             )}
                         </div>
@@ -230,25 +261,35 @@ const Dashboard: React.FC<{setActiveView: (view: View) => void}> = ({setActiveVi
                                     initial="hidden"
                                     animate="show"
                                  >
-                                    <QuickStartButton title="Generate Content" subtitle="Go to the AI Studio" onClick={() => setActiveView(View.AIStudio)} />
-                                    <QuickStartButton title="Plan a Campaign" subtitle="Open the Campaign Planner" onClick={() => setActiveView(View.CampaignPlanner)} />
-                                    <QuickStartButton title="View Calendar" subtitle="See your content schedule" onClick={() => setActiveView(View.ContentCalendar)} />
+                                    <QuickStartButton icon={<SparklesIcon />} title="Generate Content" subtitle="Go to the AI Studio" onClick={() => setActiveView(View.AIStudio)} />
+                                    <QuickStartButton icon={<RocketLaunchIcon />} title="Plan a Campaign" subtitle="Open the Campaign Planner" onClick={() => setActiveView(View.CampaignPlanner)} />
+                                    <QuickStartButton icon={<LayoutDashboardIcon />} title="View Calendar" subtitle="See your content schedule" onClick={() => setActiveView(View.ContentCalendar)} />
                                 </motion.div>
                             </div>
                             <div>
                                 <h2 className="text-2xl font-bold text-brand-text mb-4">Recent Activity</h2>
-                                <Card className="p-4">
+                                <Card className="p-1">
                                     {recentActivity.length > 0 ? (
-                                         <ul className="space-y-3">
+                                         <ul className="divide-y divide-slate-100">
                                             {recentActivity.map(item => (
-                                                <li key={item.id} className="text-sm">
-                                                    <span className="font-semibold text-brand-text">{item.name}</span>
-                                                    <span className="text-slate-500"> was created. ({item.type})</span>
+                                                <li key={item.id} className="p-4 flex items-center gap-4 hover:bg-slate-50 transition-colors rounded-lg">
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${item.type === 'campaign' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
+                                                        {item.type === 'campaign' ? <RocketLaunchIcon className="w-5 h-5" /> : <MegaphoneIcon className="w-5 h-5" />}
+                                                    </div>
+                                                    <div className="flex-grow min-w-0">
+                                                        <p className="text-sm font-semibold text-slate-800 truncate">{item.name}</p>
+                                                        <p className="text-xs text-slate-500 mt-0.5 capitalize">{item.type} • {new Date(item.date).toLocaleDateString()}</p>
+                                                    </div>
                                                 </li>
                                             ))}
                                         </ul>
                                     ) : (
-                                        <p className="text-sm text-slate-500 text-center py-4">No recent activity.</p>
+                                        <div className="text-center py-8">
+                                            <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400">
+                                                <FolderIcon className="w-6 h-6" />
+                                            </div>
+                                            <p className="text-sm text-slate-500">No recent activity.</p>
+                                        </div>
                                     )}
                                 </Card>
                             </div>
