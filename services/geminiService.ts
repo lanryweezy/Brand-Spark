@@ -6,7 +6,7 @@ import {
     Influencer, Goal 
 } from '../types';
 
-const API_BASE_URL = '/api'; // This will be proxied to your Python backend in a production setup.
+const API_BASE_URL = '/_/backend'; // This will be proxied to your Python backend in a production setup.
 const USE_MOCKS = (import.meta as any).env?.VITE_USE_MOCKS === 'true';
 
 // Lightweight mock responder used in Demo mode to avoid network calls.

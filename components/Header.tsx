@@ -1,3 +1,4 @@
+import { LogOut } from 'lucide-react';
 import React, { useState, useRef, useEffect } from 'react';
 import BrandSelector from './BrandSelector';
 import { useAuth } from '../hooks/useAuth';
@@ -61,7 +62,6 @@ const UserProfileDropdown: React.FC = () => {
 };
 
 
-import { LogOut } from 'lucide-react';
 
 const Header: React.FC = () => {
   return (

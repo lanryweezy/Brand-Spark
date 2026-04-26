@@ -15,7 +15,7 @@ interface AIProvider {
 
 // Utility: read env flags
 const USE_MOCKS = (import.meta as any).env?.VITE_USE_MOCKS === 'true';
-const API_BASE_URL = '/api';
+const API_BASE_URL = '/_/backend';
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {

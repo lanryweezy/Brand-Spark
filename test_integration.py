@@ -9,7 +9,7 @@ import json
 import time
 
 # Configuration
-FRONTEND_URL = "http://localhost:3000"
+FRONTEND_URL = "http://localhost:3002"
 BACKEND_URL = "http://localhost:8000"
 LANDING_URL = "http://localhost:8080"
 
