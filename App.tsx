@@ -32,6 +32,7 @@ const App: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
   });
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(isSidebarCollapsed));
@@ -110,34 +111,53 @@ const App: React.FC = () => {
 
 
   return (
-    <div className="bg-slate-50 font-sans">
-      <DemoModeBanner />
-      <Sidebar 
-          activeView={activeView} 
-          setActiveView={setActiveView} 
-          navStructure={navStructure}
-          isCollapsed={isSidebarCollapsed}
-          setIsCollapsed={setIsSidebarCollapsed}
-      />
-      <div className={`relative transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'pl-20' : 'pl-64'}`}>
-          <div className="flex flex-col h-screen">
-              <Header />
-              <main className="flex-1 overflow-y-auto">
-                <div className="p-6 sm:p-8 lg:p-10 mx-auto max-w-7xl w-full">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={activeView}
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -15 }}
-                      transition={{ duration: 0.25 }}
-                    >
-                      {renderActiveView()}
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-              </main>
-          </div>
+    <div className="bg-slate-50 dark:bg-slate-900 font-sans flex h-screen overflow-hidden">
+      {/* Mobile Sidebar Overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm md:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar Component */}
+      <div className={`fixed inset-y-0 left-0 z-50 transform md:relative md:translate-x-0 transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <Sidebar
+            activeView={activeView}
+            setActiveView={(view) => {
+              setActiveView(view);
+              setIsMobileMenuOpen(false);
+            }}
+            navStructure={navStructure}
+            isCollapsed={isSidebarCollapsed}
+            setIsCollapsed={setIsSidebarCollapsed}
+            className="h-full"
+        />
+      </div>
+
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+          <DemoModeBanner />
+          <Header onMenuClick={() => setIsMobileMenuOpen(true)} />
+          <main className="flex-1 overflow-y-auto relative">
+            <div className="p-4 sm:p-6 lg:p-8 mx-auto max-w-7xl w-full">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeView}
+                  initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -15, scale: 1.02 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  {renderActiveView()}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </main>
       </div>
       <ToastContainer />
       <GuideModal isOpen={showGuide} onClose={handleCloseGuide} />

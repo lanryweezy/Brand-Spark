@@ -13,7 +13,7 @@ const Card: React.FC<CardProps> = ({ children, className = '', onClick, ...props
       onClick={onClick}
       {...props}
     >
-      <div className="p-6 h-full flex flex-col">
+      <div className="p-4 sm:p-6 h-full flex flex-col">
         {children}
       </div>
     </div>

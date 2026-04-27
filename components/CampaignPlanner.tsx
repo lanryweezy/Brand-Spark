@@ -1,3 +1,4 @@
+import { SparklesIcon } from "../constants";
 
 import React, { useState, useEffect } from 'react';
 import Card from './ui/Card';
@@ -94,21 +95,25 @@ const CampaignFormModal: React.FC<{
             label: 'Details',
             content: (
                 <div className="space-y-4">
-                     <div className="p-4 bg-brand-primary-light rounded-lg space-y-3">
-                         <h4 className="font-bold text-brand-primary">Generate with AI</h4>
-                         <Textarea id="ai-goal" label="Campaign Goal" value={aiGoal} onChange={e => setAiGoal(e.target.value)} placeholder="e.g., Increase brand awareness among young professionals for our new product." />
-                         <Button type="button" onClick={handleGenerateBrief} isLoading={isGenerating}>
-                             <LightBulbIcon className="mr-2"/>
-                             {isGenerating ? 'Generating...' : 'Generate Brief'}
-                         </Button>
+                     <div className="p-5 bg-gradient-to-br from-brand-primary-light to-white dark:from-brand-primary/20 dark:to-slate-800 rounded-xl border border-brand-primary/20 space-y-4 mb-6 relative overflow-hidden">
+                         <div className="absolute top-0 right-0 p-4 opacity-10 text-brand-primary">
+                             <SparklesIcon className="w-16 h-16"/>
+                         </div>
+                         <h4 className="font-bold text-brand-primary dark:text-brand-primary-light flex items-center"><SparklesIcon className="w-5 h-5 mr-2"/> Generate with AI</h4>
+                         <Textarea id="ai-goal" label="Campaign Goal" value={aiGoal} onChange={e => setAiGoal(e.target.value)} placeholder="e.g., Increase brand awareness among young professionals for our new product." className="bg-white dark:bg-slate-900"/>
+                         <div className="flex justify-end">
+                             <Button type="button" onClick={handleGenerateBrief} isLoading={isGenerating}>
+                                 {isGenerating ? 'Generating...' : 'Generate Brief'}
+                             </Button>
+                         </div>
                      </div>
                     <Input id="name" label="Campaign Name" value={name} onChange={e => setName(e.target.value)} required />
                     <Textarea id="description" label="Description" value={description} onChange={e => setDescription(e.target.value)} required />
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <Input id="startDate" label="Start Date" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required />
                         <Input id="endDate" label="End Date" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} required />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <Select id="status" label="Status" value={status} onChange={e => setStatus(e.target.value as any)}>
                             <option value="Planning">Planning</option>
                             <option value="Active">Active</option>

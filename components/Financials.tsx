@@ -117,7 +117,7 @@ const Financials: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
                 <Input id="budgetName" label="Budget Name" value={name} onChange={e => setName(e.target.value)} required />
                 <Input id="budgetAmount" label="Amount" type="number" value={amount} onChange={e => setAmount(Number(e.target.value))} required />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input id="budgetStart" label="Start Date" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required />
                     <Input id="budgetEnd" label="End Date" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} required />
                 </div>
@@ -234,7 +234,7 @@ const Financials: React.FC = () => {
 
                 <div className="text-right font-bold text-lg">Total: {formatCurrency(totalAmount)}</div>
 
-                 <div className="grid grid-cols-2 gap-4">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input id="invoiceIssue" label="Issue Date" type="date" value={issueDate} onChange={e => setIssueDate(e.target.value)} required />
                     <Input id="invoiceDue" label="Due Date" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} required />
                 </div>

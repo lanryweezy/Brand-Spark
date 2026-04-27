@@ -11,6 +11,7 @@ interface SidebarProps {
   navStructure: NavStructureItem[];
   isCollapsed: boolean;
   setIsCollapsed: (isCollapsed: boolean) => void;
+  className?: string;
 }
 
 const BrandLogo: React.FC<{ logoUrl?: string; brandName: string }> = ({ logoUrl, brandName }) => {
@@ -24,7 +25,7 @@ const BrandLogo: React.FC<{ logoUrl?: string; brandName: string }> = ({ logoUrl,
     return <img src={logoUrl} alt={`${brandName} logo`} className="w-10 h-10 rounded-full flex-shrink-0" />;
 };
 
-const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, navStructure, isCollapsed, setIsCollapsed }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, navStructure, isCollapsed, setIsCollapsed, className = '' }) => {
   const { currentBrand } = useCurrentBrand();
 
   const NavLink: React.FC<{item: NavStructureItem}> = ({item}) => (
@@ -64,9 +65,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, navStructu
   );
 
   return (
-    <aside className={`fixed top-0 left-0 h-full z-40 flex flex-col bg-slate-900 text-white transition-all duration-300 ease-in-out ${isCollapsed ? 'w-20' : 'w-64'}`}>
+    <aside className={`flex flex-col bg-slate-900 dark:bg-slate-950 text-white transition-all duration-300 ease-in-out w-64 md:${isCollapsed ? 'w-20' : 'w-64'} ${className}`}>
       {/* Sidebar Header */}
-      <div className={`flex items-center h-20 border-b border-slate-800 flex-shrink-0 ${isCollapsed ? 'justify-center' : 'justify-center px-6'}`}>
+      <div className={`flex items-center h-20 border-b border-slate-800 flex-shrink-0 md:${isCollapsed ? 'justify-center' : 'justify-center px-6'} justify-center px-6`}>
         <SparklesIcon className="h-9 w-9 text-brand-primary flex-shrink-0" />
         {!isCollapsed && <h1 className="text-2xl font-bold ml-2 tracking-tight">BrandSpark</h1>}
       </div>
