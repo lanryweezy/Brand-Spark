@@ -28,8 +28,8 @@ const SEOKeywordGenerator: React.FC = () => {
     setResult([]);
 
     try {
-      const keywords = await ai.generateSEOKeywords({ brandId: currentBrand.id, topic });
-      setResult(keywords);
+      const keywords = await ai.generateSEOKeywords({ brandId: currentBrand.id, topic }) as any;
+      setResult(keywords.map((k: any) => ({...k, relevance: k.relevance || 'High', intent: k.intent || 'Informational'})));
       addToast('SEO keywords generated.', 'success');
     } catch (err: any) {
       setError(err.toString());

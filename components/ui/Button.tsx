@@ -16,7 +16,7 @@ const Button: React.FC<ButtonProps> = ({
     ...props 
 }) => {
 
-  const baseClasses = 'inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 disabled:cursor-not-allowed disabled:opacity-60 transform active:scale-[0.98]';
+  const baseClasses = 'inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 transform active:scale-[0.98]';
 
   const sizeClasses = {
     sm: 'px-4 py-2 text-xs',
@@ -25,10 +25,10 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   const variantClasses = {
-    primary: `text-white bg-brand-primary hover:bg-[#4d1bc2] focus:ring-brand-primary/20 shadow-md shadow-brand-primary/20 hover:shadow-lg hover:shadow-brand-primary/30`,
-    secondary: `bg-white text-slate-700 border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 focus:ring-slate-200 shadow-sm`,
-    ghost: `bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:ring-slate-200 shadow-none`,
-    danger: `text-white bg-red-500 hover:bg-red-600 focus:ring-red-500/20 shadow-md shadow-red-500/20`
+    primary: `text-white bg-brand-primary hover:bg-[#4d1bc2] focus-visible:ring-brand-primary shadow-md shadow-brand-primary/20 hover:shadow-lg hover:shadow-brand-primary/30`,
+    secondary: `bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 focus-visible:ring-slate-400 shadow-sm`,
+    ghost: `bg-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 focus-visible:ring-slate-400 shadow-none`,
+    danger: `text-white bg-red-500 hover:bg-red-600 focus-visible:ring-red-500 shadow-md shadow-red-500/20`
   };
   
   const spinnerColor = variant === 'primary' || variant === 'danger' ? 'text-white/80' : 'text-brand-primary';

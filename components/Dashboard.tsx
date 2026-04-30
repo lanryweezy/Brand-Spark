@@ -238,12 +238,12 @@ const Dashboard: React.FC<{setActiveView: (view: View) => void}> = ({setActiveVi
                                     ))}
                                 </motion.div>
                             ) : (
-                                <div className="text-center py-16 px-6 bg-white border border-dashed border-slate-300 rounded-2xl flex flex-col items-center">
+                                <div className="text-center py-16 px-6 bg-white dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-700 rounded-2xl flex flex-col items-center">
                                     <div className="w-16 h-16 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mb-4">
                                         <LightBulbIcon className="w-8 h-8" />
                                     </div>
-                                    <h3 className="text-xl font-bold text-slate-800">No goals set yet.</h3>
-                                    <p className="text-slate-500 mt-2 max-w-sm mb-6">Set a high-level goal and our AI will break it down into actionable sub-tasks.</p>
+                                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">No goals set yet.</h3>
+                                    <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-sm mb-6">Set a high-level goal and our AI will break it down into actionable sub-tasks.</p>
                                     <Button onClick={() => setIsGoalModalOpen(true)}>
                                         <PlusIcon className="mr-2" /> Add Your First Goal
                                     </Button>
@@ -270,25 +270,25 @@ const Dashboard: React.FC<{setActiveView: (view: View) => void}> = ({setActiveVi
                                 <h2 className="text-2xl font-bold text-brand-text mb-4">Recent Activity</h2>
                                 <Card className="p-1">
                                     {recentActivity.length > 0 ? (
-                                         <ul className="divide-y divide-slate-100">
+                                         <ul className="divide-y divide-slate-100 dark:divide-slate-700">
                                             {recentActivity.map(item => (
-                                                <li key={item.id} className="p-4 flex items-center gap-4 hover:bg-slate-50 transition-colors rounded-lg">
+                                                <li key={item.id} className="p-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors rounded-lg">
                                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${item.type === 'campaign' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
                                                         {item.type === 'campaign' ? <RocketLaunchIcon className="w-5 h-5" /> : <MegaphoneIcon className="w-5 h-5" />}
                                                     </div>
                                                     <div className="flex-grow min-w-0">
-                                                        <p className="text-sm font-semibold text-slate-800 truncate">{item.name}</p>
-                                                        <p className="text-xs text-slate-500 mt-0.5 capitalize">{item.type} • {new Date(item.date).toLocaleDateString()}</p>
+                                                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{item.name}</p>
+                                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 capitalize">{item.type} • {new Date(item.date).toLocaleDateString()}</p>
                                                     </div>
                                                 </li>
                                             ))}
                                         </ul>
                                     ) : (
                                         <div className="text-center py-8">
-                                            <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400">
+                                            <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400">
                                                 <FolderIcon className="w-6 h-6" />
                                             </div>
-                                            <p className="text-sm text-slate-500">No recent activity.</p>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">No recent activity.</p>
                                         </div>
                                     )}
                                 </Card>

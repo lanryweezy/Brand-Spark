@@ -47,8 +47,8 @@ const EmailCampaignGenerator: React.FC = () => {
           goal,
           productInfo,
           tone
-      });
-      setResult(emailContent);
+      }) as any;
+      setResult({...emailContent, previewText: emailContent.previewText || emailContent.body?.substring(0, 50) || ''});
       addToast('Email content generated.', 'success');
     } catch (err: any) {
       setError(err.toString());

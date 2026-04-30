@@ -9,6 +9,7 @@ import PageTitle from './ui/PageTitle';
 import EmptyState from './ui/EmptyState';
 // Fix: Import geminiService for AI-powered insights.
 import * as geminiService from '../services/geminiService';
+import { Skeleton } from './ui/Skeleton';
 
 const AIIntegrationInsights: React.FC = () => {
     const { currentBrand } = useCurrentBrand();
@@ -33,7 +34,11 @@ const AIIntegrationInsights: React.FC = () => {
         <Card>
             <h3 className="text-xl font-bold text-brand-text mb-4">AI Integration Insights</h3>
             {isLoading ? (
-                <p className="text-slate-500">Generating insights based on your connections...</p>
+                <div className="space-y-3">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                    <Skeleton className="h-4 w-4/6" />
+                </div>
             ) : (
                 <div className="bg-brand-primary-light p-4 rounded-lg flex items-start gap-3">
                     <LightBulbIcon className="w-6 h-6 text-brand-primary flex-shrink-0 mt-1"/>

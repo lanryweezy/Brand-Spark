@@ -32,8 +32,8 @@ const BlogIdeaGenerator: React.FC = () => {
     setResult([]);
 
     try {
-      const ideas = await ai.generateBlogIdeas({ brandId: currentBrand.id, topic });
-      setResult(ideas);
+      const ideas = await ai.generateBlogIdeas({ brandId: currentBrand.id, topic }) as any;
+      setResult(ideas.map((i: any) => ({...i, description: i.outline || i.description})));
       addToast('Blog ideas generated.', 'success');
     } catch (err: any) {
       setError(err.toString());

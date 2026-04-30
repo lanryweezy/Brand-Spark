@@ -2,6 +2,7 @@
 import React from 'react';
 import Card from '../../ui/Card';
 import { SparklesIcon } from '../../../constants';
+import { Skeleton } from '../../ui/Skeleton';
 
 interface AIToolContainerProps {
   title: string;
@@ -26,11 +27,17 @@ const AIToolContainer: React.FC<AIToolContainerProps> = ({ title, description, f
       </Card>
       <Card className="bg-slate-50 sticky top-8">
         <h3 className="text-lg font-bold text-brand-text mb-4">Generated Content</h3>
-        <div className="relative min-h-[300px] bg-white rounded-lg border border-slate-200 p-6 overflow-y-auto">
+        <div className="relative min-h-[300px] bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6 overflow-y-auto">
             {isLoading && (
-                 <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-lg z-10">
-                    <SparklesIcon className="h-10 w-10 text-purple-500 animate-pulse" />
-                    <p className="mt-4 text-slate-600 font-semibold">Generating Magic...</p>
+                 <div className="flex flex-col space-y-4 animate-pulse">
+                    <Skeleton className="h-8 w-3/4" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                    <div className="pt-4">
+                        <Skeleton className="h-4 w-1/2" />
+                        <Skeleton className="h-4 w-2/3 mt-2" />
+                    </div>
                  </div>
             )}
             {error && (
@@ -40,7 +47,7 @@ const AIToolContainer: React.FC<AIToolContainerProps> = ({ title, description, f
                 </div>
             )}
             {!isLoading && !error && (
-                <div className="prose prose-sm max-w-none text-slate-800">
+                <div className="prose prose-sm max-w-none text-slate-800 dark:text-slate-300">
                     {result ? result : <p className="text-slate-400 text-center py-20">Your generated content will appear here.</p>}
                 </div>
             )}

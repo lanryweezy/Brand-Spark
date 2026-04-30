@@ -43,6 +43,7 @@ export interface BrandProfile {
   website?: string;
   description?: string;
   audience?: string;
+  primaryColor?: string; // Hex color for dashboard theme customization
   baseTone?: ToneOfVoice;
   messagingPillars?: string[];
   dos?: string[];
