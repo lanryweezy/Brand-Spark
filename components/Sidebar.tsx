@@ -14,12 +14,12 @@ interface SidebarProps {
 const BrandLogo: React.FC<{ logoUrl?: string; brandName: string }> = ({ logoUrl, brandName }) => {
     if (!logoUrl) {
       return (
-        <div className="w-9 h-9 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-sm flex-shrink-0 border border-indigo-500/30">
+        <div className="w-10 h-10 rounded-lg bg-brand-primary/20 flex items-center justify-center text-brand-primary-light font-bold text-base flex-shrink-0 border border-brand-primary/40 shadow-sm shadow-brand-primary/10">
           {brandName.charAt(0)}
         </div>
       );
     }
-    return <img src={logoUrl} alt={`${brandName} logo`} className="w-9 h-9 rounded-lg flex-shrink-0 object-cover border border-slate-700" />;
+    return <img src={logoUrl} alt={`${brandName} logo`} className="w-10 h-10 rounded-lg flex-shrink-0 object-cover border border-slate-700 shadow-sm" />;
 };
 
 const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, navStructure, isCollapsed, setIsCollapsed }) => {
@@ -89,12 +89,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView, navStructu
       {/* Sidebar Footer */}
       <div className="flex-shrink-0 p-4 bg-slate-900/50 border-t border-slate-800/60">
         {currentBrand && (
-        <div className={`flex items-center p-2 mb-2 rounded-xl bg-slate-800/40 border border-slate-700/50 group relative ${isCollapsed ? 'justify-center' : ''}`}>
+        <div className={`flex items-center p-2 mb-2 rounded-xl bg-slate-800/60 hover:bg-slate-700/60 transition-colors border border-slate-700/50 cursor-pointer group relative ${isCollapsed ? 'justify-center' : ''}`}>
             <BrandLogo logoUrl={currentBrand.logo} brandName={currentBrand.name} />
             {!isCollapsed && (
               <div className="ml-3 overflow-hidden">
                   <p className="text-sm font-bold text-slate-200 truncate">{currentBrand.name}</p>
-                  <p className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">Selected Brand</p>
+                  <p className="text-[10px] uppercase tracking-wider font-semibold text-slate-400">Selected Brand</p>
               </div>
             )}
             {isCollapsed && (
