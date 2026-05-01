@@ -10,6 +10,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { User, Role } from '../types';
 import { PlusIcon, TrashIcon, UserGroupIcon } from '../constants';
+import { FixedSizeList as List } from 'react-window';
 
 const InviteUserModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const { addUser } = useUsers();
@@ -46,6 +47,72 @@ const InviteUserModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </Modal>
     );
 };
+
+import { memo, CSSProperties } from 'react';
+import { areEqual } from 'react-window';
+
+interface RowProps {
+    index: number;
+    style: CSSProperties;
+    data: {
+        users: User[];
+        isAdmin: boolean;
+        currentUser: User | null;
+        handleRoleChange: (userId: string, newRole: Role) => void;
+        handleDeleteUser: (user: User) => void;
+    };
+}
+
+const Row = memo(({ index, style, data }: RowProps) => {
+    const { users, isAdmin, currentUser, handleRoleChange, handleDeleteUser } = data;
+    const user = users[index];
+    return (
+        <div style={style} className="flex border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 items-center">
+            <div className="px-6 py-4 whitespace-nowrap flex-1">
+                <div className="flex items-center">
+                    <div className="flex-shrink-0 h-10 w-10">
+                        <img className="h-10 w-10 rounded-full" src={user.avatarUrl} alt={user.name} />
+                    </div>
+                    <div className="ml-4">
+                        <div className="text-sm font-medium text-brand-text dark:text-slate-200">{user.name}</div>
+                        <div className="text-sm text-slate-500 dark:text-slate-400">{user.email}</div>
+                    </div>
+                </div>
+            </div>
+            <div className="px-6 py-4 whitespace-nowrap w-48">
+                {isAdmin ? (
+                    <Select
+                        label=""
+                        id={`role-${user.id}`}
+                        value={user.role}
+                        onChange={(e) => handleRoleChange(user.id, e.target.value as Role)}
+                        disabled={user.id === currentUser?.id}
+                        className="w-40 text-sm"
+                    >
+                        <option value={Role.Admin}>Admin</option>
+                        <option value={Role.Member}>Member</option>
+                    </Select>
+                ) : (
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.role === Role.Admin ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-800'}`}>
+                        {user.role}
+                    </span>
+                )}
+            </div>
+            {isAdmin && (
+                <div className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium w-24">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteUser(user)}
+                        disabled={user.id === currentUser?.id}
+                    >
+                        <TrashIcon className="w-5 h-5 text-slate-500 hover:text-red-600" />
+                    </Button>
+                </div>
+            )}
+        </div>
+    );
+}, areEqual);
 
 const TeamManagement: React.FC = () => {
     const { users, updateUser, deleteUser } = useUsers();
@@ -84,65 +151,23 @@ const TeamManagement: React.FC = () => {
                     )
                 }
             />
-            <Card className="p-0">
-                <div className="overflow-x-auto">
-                    <table className="min-w-full">
-                        <thead className="bg-slate-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Name</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Role</th>
-                                {isAdmin && <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>}
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-slate-200">
-                            {users.map(user => (
-                                <tr key={user.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center">
-                                            <div className="flex-shrink-0 h-10 w-10">
-                                                <img className="h-10 w-10 rounded-full" src={user.avatarUrl} alt={user.name} />
-                                            </div>
-                                            <div className="ml-4">
-                                                <div className="text-sm font-medium text-brand-text">{user.name}</div>
-                                                <div className="text-sm text-slate-500">{user.email}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        {isAdmin ? (
-                                            <Select
-                                                label=""
-                                                id={`role-${user.id}`}
-                                                value={user.role}
-                                                onChange={(e) => handleRoleChange(user.id, e.target.value as Role)}
-                                                disabled={user.id === currentUser?.id}
-                                                className="w-40 text-sm"
-                                            >
-                                                <option value={Role.Admin}>Admin</option>
-                                                <option value={Role.Member}>Member</option>
-                                            </Select>
-                                        ) : (
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.role === Role.Admin ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-800'}`}>
-                                                {user.role}
-                                            </span>
-                                        )}
-                                    </td>
-                                    {isAdmin && (
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => handleDeleteUser(user)}
-                                                disabled={user.id === currentUser?.id}
-                                            >
-                                                <TrashIcon className="w-5 h-5 text-slate-500 hover:text-red-600" />
-                                            </Button>
-                                        </td>
-                                    )}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            <Card className="p-0 overflow-hidden">
+                <div className="overflow-x-auto min-w-[600px]">
+                    <div className="flex bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                        <div className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider flex-1">Name</div>
+                        <div className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider w-48">Role</div>
+                        {isAdmin && <div className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">Actions</div>}
+                    </div>
+                    <List
+                        height={600}
+                        itemCount={users.length}
+                        itemSize={80}
+                        width="100%"
+                        className="sidebar-nav-scroll"
+                        itemData={{ users, isAdmin, currentUser, handleRoleChange, handleDeleteUser }}
+                    >
+                        {Row as any}
+                    </List>
                 </div>
             </Card>
             {isModalOpen && <InviteUserModal onClose={() => setIsModalOpen(false)} />}

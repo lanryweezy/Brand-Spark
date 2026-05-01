@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard';
 import AIStudio from './components/AIStudio';
 import DemoPage from './components/DemoPage';
 import { View, NavStructureItem } from './types';
+import { useCurrentBrand } from './hooks/useCurrentBrand';
 import { SparklesIcon, LayoutDashboardIcon, BuildingStorefrontIcon, CalendarDaysIcon, MegaphoneIcon, RocketLaunchIcon, UserGroupIcon, ChartBarIcon, CpuChipIcon, LinkIcon, FolderIcon, BriefcaseIcon, CurrencyDollarIcon, CogIcon } from './constants';
 import BrandSettings from './components/BrandSettings';
 import ContentCalendar from './components/ContentCalendar';
@@ -36,6 +37,16 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(isSidebarCollapsed));
   }, [isSidebarCollapsed]);
+
+  const { currentBrand } = useCurrentBrand();
+
+  useEffect(() => {
+    if (currentBrand?.primaryColor) {
+      document.documentElement.style.setProperty('--brand-primary-dynamic', currentBrand.primaryColor);
+    } else {
+      document.documentElement.style.setProperty('--brand-primary-dynamic', '#5c22d9');
+    }
+  }, [currentBrand?.primaryColor]);
 
   const [showGuide, setShowGuide] = useState(() => {
     try {
@@ -110,7 +121,7 @@ const App: React.FC = () => {
 
 
   return (
-    <div className="bg-slate-50 font-sans">
+    <div className="bg-slate-50 dark:bg-slate-900 font-sans min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-200">
       <DemoModeBanner />
       <Sidebar 
           activeView={activeView} 

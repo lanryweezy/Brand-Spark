@@ -66,10 +66,10 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({ integration }) => {
                 }
             }
             updateData();
-            interval = setInterval(updateData, 5000);
+            interval = window.setInterval(updateData, 5000);
         }
         return () => {
-            if(interval) clearInterval(interval);
+            if(interval) window.clearInterval(interval);
         }
     }, [integration.connected, integration.id]);
 
