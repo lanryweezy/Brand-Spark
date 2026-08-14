@@ -171,8 +171,23 @@ def generate_blog_ideas():
         return jsonify([{"title": f"{data['topic']} strategies for {brand.name}", "outline": "Intro, Tips, CTA"}])
 
     try:
-        resp = model.generate_content(f"Generate 5 blog ideas for brand {brand.name} about: {data['topic']}. Respond as JSON array of objects with title and outline.")
-        return jsonify([{"title": f"{data['topic']} ideas for {brand.name}", "outline": resp.text[:120]}])
+        prompt = f"Generate 5 blog ideas for brand {brand.name} about: {data['topic']}. Respond ONLY as a JSON array of objects, each with 'title' and 'outline' string fields."
+        resp = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
+        )
+
+        # Astra: Output validation before use - handle raw JSON parsing and validate structure with fallback
+        import json
+        try:
+            parsed = json.loads(resp.text)
+            if not isinstance(parsed, list):
+                raise ValueError("AI output is not a JSON array")
+            return jsonify(parsed)
+        except (json.JSONDecodeError, ValueError) as parse_err:
+            print(f"AI JSON Parse Error: {parse_err}")
+            return jsonify([{"title": f"{data['topic']} ideas for {brand.name}", "outline": "Could not generate ideas. Please try again."}])
+
     except Exception as e:
         return jsonify({"error": f"AI generation failed: {str(e)}"}), 500
 
