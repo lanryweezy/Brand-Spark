@@ -1,4 +1,5 @@
 import os
+import json
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import google.generativeai as genai
@@ -171,6 +172,48 @@ def generate_blog_ideas():
         return jsonify([{"title": f"{data['topic']} strategies for {brand.name}", "outline": "Intro, Tips, CTA"}])
 
     try:
+        # ASTRA AI Quality Improvement:
+        # 1. Added explicit JSON output instructions (no markdown, exact schema)
+        # 2. Added safe JSON parsing with try/except
+        # 3. Added graceful fallback instead of silently returning corrupted raw text
+        prompt = (
+            f"Generate 5 blog ideas for brand {brand.name} about: {data['topic']}. "
+            "Respond ONLY with a valid JSON array of objects. "
+            "Each object must have exactly two keys: 'title' (string) and 'outline' (string). "
+            "Do not include markdown formatting or preamble."
+        )
+        resp = model.generate_content(prompt)
+
+        raw_text = resp.text.strip()
+        if raw_text.startswith("```json"):
+            raw_text = raw_text[7:]
+        if raw_text.endswith("```"):
+            raw_text = raw_text[:-3]
+        raw_text = raw_text.strip()
+
+        parsed_data = json.loads(raw_text)
+
+        # Basic validation: ensure it's a list and has title/outline
+        if not isinstance(parsed_data, list):
+            raise ValueError("Expected a JSON array")
+
+        valid_ideas = []
+        for item in parsed_data:
+            if isinstance(item, dict) and 'title' in item and 'outline' in item:
+                valid_ideas.append({
+                    "title": str(item['title']),
+                    "outline": str(item['outline'])
+                })
+
+        if not valid_ideas:
+            raise ValueError("No valid blog ideas found in response")
+
+        return jsonify(valid_ideas)
+
+    except (json.JSONDecodeError, ValueError) as e:
+        # Fallback if model hallucinates non-JSON or invalid schema
+        print(f"AI Parse Error: {e}")
+        return jsonify([{"title": f"{data['topic']} ideas for {brand.name}", "outline": "Intro, Key points, Conclusion (Fallback response due to unexpected AI format)"}])
         prompt = f"Generate 5 blog ideas for brand {brand.name} about: {data['topic']}. Respond ONLY as a JSON array of objects, each with 'title' and 'outline' string fields."
         resp = model.generate_content(
             prompt,
