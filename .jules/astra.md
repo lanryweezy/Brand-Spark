@@ -5,3 +5,6 @@
 ## 2023-10-27 - Preserving Schema Compatibility in AI Fallbacks
 **Learning:** When enforcing JSON schema outputs for AI generation, it's crucial to explicitly ask the model to generate all expected fields (like `note`) to ensure the response matches the shape required by the frontend client. Fallback mechanisms should also return a mock structure containing these identical fields.
 **Action:** Always verify the full expected structure from the client before modifying the AI prompt or fallbacks to avoid schema-related regressions.
+## 2023-10-10 - Bypassing AI Output Entirely
+**Learning:** Returning a hardcoded response structure while ignoring the actual AI model's output constitutes a major silent failure and defeats the purpose of the integration.
+**Action:** Always parse the actual AI response text (`resp.text`), validate it, and return the parsed data instead of returning mock data with a slice of raw text injected.
