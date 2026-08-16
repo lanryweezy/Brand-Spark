@@ -238,8 +238,23 @@ def generate_seo_keywords():
         return jsonify([{"keyword": data["topic"], "volume": 100, "difficulty": 20}])
 
     try:
-        resp = model.generate_content(f"Generate 10 SEO keywords for {brand.name} about {data['topic']}. Respond as JSON with keyword, volume, difficulty.")
-        return jsonify([{"keyword": data["topic"], "volume": 100, "difficulty": 20, "note": resp.text[:60]}])
+        prompt = f"Generate 10 SEO keywords for {brand.name} about {data['topic']}. Respond ONLY as a JSON array of objects, each with 'keyword' (string), 'volume' (number), and 'difficulty' (number) fields."
+        resp = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
+        )
+
+        # Astra: Output validation before use - handle raw JSON parsing and validate structure with fallback
+        import json
+        try:
+            parsed = json.loads(resp.text)
+            if not isinstance(parsed, list):
+                raise ValueError("AI output is not a JSON array")
+            return jsonify(parsed)
+        except (json.JSONDecodeError, ValueError) as parse_err:
+            print(f"AI JSON Parse Error: {parse_err}")
+            return jsonify([{"keyword": data["topic"], "volume": 100, "difficulty": 20, "note": "Could not generate SEO keywords. Please try again."}])
+
     except Exception as e:
         return jsonify({"error": f"AI generation failed: {str(e)}"}), 500
 
