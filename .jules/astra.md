@@ -1,3 +1,13 @@
 ## 2025-02-24 - Handle AI JSON Array Generation Parsing Gracefully
 **Learning:** Returning a single truncated string instead of parsing an explicitly requested JSON array can silently lead to malformed data for the UI if the AI hallucinates formatting (like markdown wrapping), resulting in silent failures. When requesting JSON from an LLM, the raw string needs to be cleaned (stripping out markdown artifacts like ```json) and strictly parsed.
 **Action:** When creating a prompt that requires structured JSON output, explicitly instruct the model NOT to include markdown or preamble. Use try/except blocks to wrap `json.loads`, validate the resulting schema (e.g., verifying it's a list with required keys), and provide a graceful fallback that matches the expected data shape in the UI if parsing or validation fails.
+## 2023-10-10 - Silent Failures in JSON Output Handling
+**Learning:** Returning truncated raw model text instead of parsing JSON requests masks AI output parsing failures. By just slicing the response text when a JSON array is requested, we completely fail to leverage structured data and break downstream frontend dependencies silently.
+**Action:** Always use `response_mime_type="application/json"` with Gemini, validate the structure of `json.loads` output, and provide a graceful structured fallback instead of returning a mock structure containing raw string text.
+
+## 2023-10-27 - Preserving Schema Compatibility in AI Fallbacks
+**Learning:** When enforcing JSON schema outputs for AI generation, it's crucial to explicitly ask the model to generate all expected fields (like `note`) to ensure the response matches the shape required by the frontend client. Fallback mechanisms should also return a mock structure containing these identical fields.
+**Action:** Always verify the full expected structure from the client before modifying the AI prompt or fallbacks to avoid schema-related regressions.
+## 2023-10-10 - Bypassing AI Output Entirely
+**Learning:** Returning a hardcoded response structure while ignoring the actual AI model's output constitutes a major silent failure and defeats the purpose of the integration.
+**Action:** Always parse the actual AI response text (`resp.text`), validate it, and return the parsed data instead of returning mock data with a slice of raw text injected.

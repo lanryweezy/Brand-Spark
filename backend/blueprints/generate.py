@@ -214,6 +214,23 @@ def generate_blog_ideas():
         # Fallback if model hallucinates non-JSON or invalid schema
         print(f"AI Parse Error: {e}")
         return jsonify([{"title": f"{data['topic']} ideas for {brand.name}", "outline": "Intro, Key points, Conclusion (Fallback response due to unexpected AI format)"}])
+        prompt = f"Generate 5 blog ideas for brand {brand.name} about: {data['topic']}. Respond ONLY as a JSON array of objects, each with 'title' and 'outline' string fields."
+        resp = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
+        )
+
+        # Astra: Output validation before use - handle raw JSON parsing and validate structure with fallback
+        import json
+        try:
+            parsed = json.loads(resp.text)
+            if not isinstance(parsed, list):
+                raise ValueError("AI output is not a JSON array")
+            return jsonify(parsed)
+        except (json.JSONDecodeError, ValueError) as parse_err:
+            print(f"AI JSON Parse Error: {parse_err}")
+            return jsonify([{"title": f"{data['topic']} ideas for {brand.name}", "outline": "Could not generate ideas. Please try again."}])
+
     except Exception as e:
         return jsonify({"error": f"AI generation failed: {str(e)}"}), 500
 
@@ -264,8 +281,21 @@ def generate_seo_keywords():
         return jsonify([{"keyword": data["topic"], "volume": 100, "difficulty": 20}])
 
     try:
-        resp = model.generate_content(f"Generate 10 SEO keywords for {brand.name} about {data['topic']}. Respond as JSON with keyword, volume, difficulty.")
-        return jsonify([{"keyword": data["topic"], "volume": 100, "difficulty": 20, "note": resp.text[:60]}])
+        prompt = f"Generate 10 SEO keywords for {brand.name} about {data['topic']}. Respond ONLY as a JSON array of objects, each with 'keyword' (string), 'volume' (number), 'difficulty' (number), and 'note' (string)."
+        resp = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
+        )
+
+        import json
+        try:
+            parsed = json.loads(resp.text)
+            if not isinstance(parsed, list):
+                raise ValueError("AI output is not a JSON array")
+            return jsonify(parsed)
+        except (json.JSONDecodeError, ValueError) as parse_err:
+            print(f"AI JSON Parse Error: {parse_err}")
+            return jsonify([{"keyword": data["topic"], "volume": 100, "difficulty": 20, "note": "Failed to parse AI output."}])
     except Exception as e:
         return jsonify({"error": f"AI generation failed: {str(e)}"}), 500
 
