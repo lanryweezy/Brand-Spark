@@ -317,8 +317,35 @@ def generate_email_campaign():
         return jsonify({"subject": f"{brand.name}: {data['goal']}", "body": f"Introducing {data['productInfo']} — {data['tone']} tone."})
 
     try:
-        resp = model.generate_content(f"Create an email campaign for {brand.name}. Goal: {data['goal']}. Product info: {data['productInfo']}. Tone: {data['tone']}. Return subject and body.")
-        return jsonify({"subject": "Subject", "body": resp.text})
+        # ASTRA AI Quality Improvement:
+        # 1. Added explicit JSON output instructions for multi-part text (subject + body).
+        # 2. Used generation_config with response_mime_type to enforce JSON.
+        # 3. Added safe JSON parsing to avoid silent failure of dropping the generated subject.
+        prompt = (
+            f"Create an email campaign for {brand.name}. Goal: {data['goal']}. "
+            f"Product info: {data['productInfo']}. Tone: {data['tone']}. "
+            "Respond ONLY as a JSON object with two string fields: 'subject' and 'body'."
+        )
+        resp = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
+        )
+
+        import json
+        try:
+            parsed = json.loads(resp.text)
+            if not isinstance(parsed, dict) or 'subject' not in parsed or 'body' not in parsed:
+                raise ValueError("AI output missing required 'subject' or 'body' fields")
+            return jsonify({
+                "subject": str(parsed['subject']),
+                "body": str(parsed['body'])
+            })
+        except (json.JSONDecodeError, ValueError) as parse_err:
+            print(f"AI JSON Parse Error: {parse_err}")
+            return jsonify({
+                "subject": f"{brand.name} Update",
+                "body": "Could not generate email content correctly. Please try again."
+            })
     except Exception as e:
         return jsonify({"error": f"AI generation failed: {str(e)}"}), 500
 
