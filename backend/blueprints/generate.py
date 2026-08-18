@@ -363,7 +363,24 @@ def generate_tags():
         return jsonify(["demo", "brandspark", "ai"])
 
     try:
-        resp = model.generate_content(f"Suggest 5 tags for content type {data['type']}. Content:\n{data['content']}\nReturn a JSON array of strings.")
-        return jsonify(["tag1", "tag2", "tag3"])
+        # ASTRA AI Quality Improvement:
+        # 1. Added explicit JSON output instructions and used response_mime_type to enforce JSON array output.
+        # 2. Replaced hardcoded dummy response with safe JSON parsing of actual model output.
+        # 3. Provided graceful fallback structure for parse failures.
+        prompt = f"Suggest 5 tags for content type {data['type']}. Content:\n{data['content']}\nReturn ONLY a JSON array of strings."
+        resp = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
+        )
+
+        import json
+        try:
+            parsed = json.loads(resp.text)
+            if not isinstance(parsed, list):
+                raise ValueError("AI output is not a JSON array")
+            return jsonify(parsed)
+        except (json.JSONDecodeError, ValueError) as parse_err:
+            print(f"AI JSON Parse Error: {parse_err}")
+            return jsonify(["content", "marketing", "tags"])
     except Exception as e:
         return jsonify({"error": f"AI generation failed: {str(e)}"}), 500
