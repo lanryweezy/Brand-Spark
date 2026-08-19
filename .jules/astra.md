@@ -15,3 +15,7 @@
 ## 2025-02-25 - Multi-part text generation silent failures
 **Learning:** Requesting multi-part text (like an email subject and body) in a single plain text response often leads to parsing issues, causing developers to silently hardcode fields (e.g., hardcoding the "subject" while only returning the "body" from the model).
 **Action:** For any text generation task that requires multiple distinct fields, explicitly require a JSON object output using `response_mime_type="application/json"`. Parse and validate the response, ensuring all required fields are present, and fall back gracefully if missing.
+
+## 2024-05-24 - [Graceful Fallbacks and Prompt Formatting for Raw Text Generation]
+**Learning:** For endpoints generating plain string output (like ad copy or social posts), failing to explicitly instruct the model to exclude markdown formatting or preamble often results in corrupt string generation. When the AI fails, catching the exception and returning a generated fallback (like a generic on-brand template) is critical to prevent surfacing generic 500 errors to users and breaking the frontend formatting.
+**Action:** Always add "Do not include markdown, preamble, or commentary" to simple text generation prompts. Always wrap AI call in a try/catch, logging the exact AI failure but catching the exception and returning a simple baseline template fallback that fulfills the endpoint's contract format (e.g. a plain text string representation) instead of raw 500 errors.

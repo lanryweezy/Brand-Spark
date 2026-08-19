@@ -251,14 +251,28 @@ def generate_ad_copy():
     if brand is None:
         return jsonify({"error": "Brand not found or access denied"}), 404
 
+    fallback_text = f"{brand.name}: {data['product']} — {data['sellingPoints']} (Tone: {data['tone']})"
+
     if not model:
-        return jsonify(f"{brand.name}: {data['product']} — {data['sellingPoints']} (Tone: {data['tone']})")
+        return jsonify(fallback_text)
 
     try:
-        resp = model.generate_content(f"Write ad copy for {brand.name}. Product: {data['product']}. Selling points: {data['sellingPoints']}. Tone: {data['tone']}.")
-        return jsonify(resp.text)
+        # ASTRA AI Quality Improvement:
+        # 1. Expanded vague prompt with clear role and output constraints.
+        # 2. Added explicit negative constraints against markdown and preamble.
+        # 3. Added graceful fallback on exception instead of surfacing raw 500 errors.
+        prompt = (
+            f"You are an expert copywriter. Write a short ad copy for {brand.name}. "
+            f"Product: {data['product']}. "
+            f"Selling points: {data['sellingPoints']}. "
+            f"Tone: {data['tone']}. "
+            "Return ONLY the ad copy text. Do not include markdown, preamble, or commentary."
+        )
+        resp = model.generate_content(prompt)
+        return jsonify(resp.text.strip())
     except Exception as e:
-        return jsonify({"error": f"AI generation failed: {str(e)}"}), 500
+        print(f"AI Error in generate_ad_copy: {e}")
+        return jsonify(fallback_text)
 
 @generate_bp.route("/seo-keywords", methods=["POST"])
 @jwt_required()
