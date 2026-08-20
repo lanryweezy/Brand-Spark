@@ -85,11 +85,14 @@ def generate_social_post():
     if brand is None:
         return jsonify({"error": "Brand not found or access denied"}), 404
 
-    # Deterministic fallback when model isn't configured
+    # Deterministic fallback when model isn't configured or fails
+    fallback_text = f"{data['platform']}: Introducing {data['product']} for {data['audience']} — on-brand, {data['tone']} tone. #{brand.name.replace(' ', '')}"
     if not model:
-        text = f"{data['platform']}: Introducing {data['product']} for {data['audience']} — on-brand, {data['tone']} tone. #{brand.name.replace(' ', '')}"
-        return jsonify(text)
+        return jsonify(fallback_text)
 
+    # ASTRA AI Quality Improvement:
+    # 1. Added explicit negative constraints against markdown and preamble.
+    # 2. Added graceful fallback on exception instead of surfacing raw 500 errors.
     prompt = f"""
 You are an expert social media manager. Generate a social media post for the following brand.
 
@@ -100,14 +103,15 @@ Product/Service to Promote: {data['product']}
 Target Audience: {data['audience']}
 Tone of Voice: {data['tone']}
 
-Generate the post content only, without any extra commentary.
+Generate the post content only. Do not include markdown, preamble, or commentary.
 """
 
     try:
         response = model.generate_content(prompt)
-        return jsonify(response.text)
+        return jsonify(response.text.strip())
     except Exception as e:
-        return jsonify({"error": f"AI generation failed: {str(e)}"}), 500
+        print(f"AI Error in generate_social_post: {e}")
+        return jsonify(fallback_text)
 
 @generate_bp.route("/text", methods=["POST"])
 @jwt_required()
@@ -126,9 +130,13 @@ def generate_text():
     if brand is None:
         return jsonify({"error": "Brand not found or access denied"}), 404
 
+    fallback_text = f"[Demo Fallback] {data['prompt']} — aligned to {brand.name} tone."
     if not model:
-        return jsonify({"generated_text": f"[Demo Fallback] {data['prompt']} — aligned to {brand.name} tone."})
+        return jsonify({"generated_text": fallback_text})
 
+    # ASTRA AI Quality Improvement:
+    # 1. Added explicit negative constraints against markdown and preamble.
+    # 2. Added graceful fallback on exception instead of surfacing raw 500 errors.
     final_prompt = f"""
 You are an AI assistant for a marketing team. Your task is to generate text based on the user's prompt, while adhering to the specified brand's identity.
 
@@ -142,14 +150,15 @@ User's Prompt:
 "{data['prompt']}"
 
 Please generate a response that is creative, on-brand, and directly addresses the user's prompt.
+Do not include markdown, preamble, or commentary.
 """
 
     try:
         response = model.generate_content(final_prompt)
-        return jsonify({"generated_text": response.text})
+        return jsonify({"generated_text": response.text.strip()})
     except Exception as e:
         print(f"Error during AI text generation: {e}")
-        return jsonify({"error": f"AI generation failed: {str(e)}"}), 500
+        return jsonify({"generated_text": fallback_text})
 
 @generate_bp.route("/blog-ideas", methods=["POST"])
 @jwt_required()
