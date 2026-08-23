@@ -27,3 +27,6 @@
 ## 2026-08-21 - Enforcing JSON Structure and Graceful Fallbacks
 **Learning:** Manual markdown parsing/stripping for AI JSON output is brittle and can lead to silent data corruption when models hallucinate unexpected formatting. Furthermore, catching only specific parse errors while leaving network/API exceptions unhandled surfaces raw 500 errors and breaks the client.
 **Action:** Always enforce JSON outputs using `response_mime_type="application/json"`. Use a single robust `except Exception` block to catch both parsing failures and generative model errors, returning a unified, clean fallback structure that satisfies the client UI.
+## 2023-11-09 - Validate array item elements during JSON parsing
+**Learning:** Checking that `json.loads` returns a list is necessary but not sufficient. AI models occasionally return lists of arbitrary elements (e.g., list of strings instead of dicts) when complex JSON schemas are requested.
+**Action:** When validating AI-generated JSON arrays, iterate through the parsed list and explicitly verify that the inner items have the expected type (e.g. `dict`) and contain the minimum required structural keys before accepting the response.
