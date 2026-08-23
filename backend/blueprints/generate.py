@@ -300,10 +300,16 @@ def generate_seo_keywords():
     if brand is None:
         return jsonify({"error": "Brand not found or access denied"}), 404
 
+    fallback_response = [{"keyword": data["topic"], "volume": 100, "difficulty": 20, "note": "Fallback: Could not generate keywords."}]
+
     if not model:
-        return jsonify([{"keyword": data["topic"], "volume": 100, "difficulty": 20}])
+        return jsonify(fallback_response)
 
     try:
+        # ASTRA AI Quality Improvement:
+        # 1. Validate structure of the output (including individual items inside generated arrays).
+        # 2. Use a broad except Exception block to catch both model/network errors and parsing failures,
+        #    returning a unified graceful fallback matching expected schema instead of throwing raw 500 errors.
         prompt = f"Generate 10 SEO keywords for {brand.name} about {data['topic']}. Respond ONLY as a JSON array of objects, each with 'keyword' (string), 'volume' (number), 'difficulty' (number), and 'note' (string)."
         resp = model.generate_content(
             prompt,
@@ -311,16 +317,22 @@ def generate_seo_keywords():
         )
 
         import json
-        try:
-            parsed = json.loads(resp.text)
-            if not isinstance(parsed, list):
-                raise ValueError("AI output is not a JSON array")
-            return jsonify(parsed)
-        except (json.JSONDecodeError, ValueError) as parse_err:
-            print(f"AI JSON Parse Error: {parse_err}")
-            return jsonify([{"keyword": data["topic"], "volume": 100, "difficulty": 20, "note": "Failed to parse AI output."}])
+        parsed = json.loads(resp.text)
+        if not isinstance(parsed, list):
+            raise ValueError("AI output is not a JSON array")
+
+        valid_items = []
+        for item in parsed:
+            if isinstance(item, dict) and 'keyword' in item:
+                valid_items.append(item)
+
+        if not valid_items:
+            raise ValueError("No valid SEO keyword items found in AI response")
+
+        return jsonify(valid_items)
     except Exception as e:
-        return jsonify({"error": f"AI generation failed: {str(e)}"}), 500
+        print(f"AI Generation/Parse Error: {e}")
+        return jsonify(fallback_response)
 
 @generate_bp.route("/email-campaign", methods=["POST"])
 @jwt_required()
