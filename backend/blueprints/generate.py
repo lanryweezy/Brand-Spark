@@ -182,29 +182,23 @@ def generate_blog_ideas():
 
     try:
         # ASTRA AI Quality Improvement:
-        # 1. Added explicit JSON output instructions (no markdown, exact schema)
-        # 2. Added safe JSON parsing with try/except
-        # 3. Added graceful fallback instead of silently returning corrupted raw text
+        # 1. Enforced JSON generation via response_mime_type instead of manual markdown stripping
+        # 2. Replaced dead/unreachable prompt duplicate with explicit validation of structure
+        # 3. Provided unified robust fallback on exception instead of raw 500 errors
         prompt = (
             f"Generate 5 blog ideas for brand {brand.name} about: {data['topic']}. "
             "Respond ONLY with a valid JSON array of objects. "
-            "Each object must have exactly two keys: 'title' (string) and 'outline' (string). "
-            "Do not include markdown formatting or preamble."
+            "Each object must have exactly two keys: 'title' (string) and 'outline' (string)."
         )
-        resp = model.generate_content(prompt)
+        resp = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
+        )
 
-        raw_text = resp.text.strip()
-        if raw_text.startswith("```json"):
-            raw_text = raw_text[7:]
-        if raw_text.endswith("```"):
-            raw_text = raw_text[:-3]
-        raw_text = raw_text.strip()
+        parsed_data = json.loads(resp.text)
 
-        parsed_data = json.loads(raw_text)
-
-        # Basic validation: ensure it's a list and has title/outline
         if not isinstance(parsed_data, list):
-            raise ValueError("Expected a JSON array")
+            raise ValueError("AI output is not a JSON array")
 
         valid_ideas = []
         for item in parsed_data:
@@ -219,29 +213,9 @@ def generate_blog_ideas():
 
         return jsonify(valid_ideas)
 
-    except (json.JSONDecodeError, ValueError) as e:
-        # Fallback if model hallucinates non-JSON or invalid schema
-        print(f"AI Parse Error: {e}")
-        return jsonify([{"title": f"{data['topic']} ideas for {brand.name}", "outline": "Intro, Key points, Conclusion (Fallback response due to unexpected AI format)"}])
-        prompt = f"Generate 5 blog ideas for brand {brand.name} about: {data['topic']}. Respond ONLY as a JSON array of objects, each with 'title' and 'outline' string fields."
-        resp = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
-        )
-
-        # Astra: Output validation before use - handle raw JSON parsing and validate structure with fallback
-        import json
-        try:
-            parsed = json.loads(resp.text)
-            if not isinstance(parsed, list):
-                raise ValueError("AI output is not a JSON array")
-            return jsonify(parsed)
-        except (json.JSONDecodeError, ValueError) as parse_err:
-            print(f"AI JSON Parse Error: {parse_err}")
-            return jsonify([{"title": f"{data['topic']} ideas for {brand.name}", "outline": "Could not generate ideas. Please try again."}])
-
     except Exception as e:
-        return jsonify({"error": f"AI generation failed: {str(e)}"}), 500
+        print(f"AI Error in generate_blog_ideas: {e}")
+        return jsonify([{"title": f"{data['topic']} ideas for {brand.name}", "outline": "Could not generate ideas. Please try again."}])
 
 @generate_bp.route("/ad-copy", methods=["POST"])
 @jwt_required()
@@ -300,8 +274,10 @@ def generate_seo_keywords():
     if brand is None:
         return jsonify({"error": "Brand not found or access denied"}), 404
 
+    fallback_response = [{"keyword": data["topic"], "volume": 100, "difficulty": 20, "note": "Fallback: Could not generate keywords."}]
+
     if not model:
-        return jsonify([{"keyword": data["topic"], "volume": 100, "difficulty": 20}])
+        return jsonify(fallback_response)
 
     try:
         # ASTRA AI Quality Improvement:
