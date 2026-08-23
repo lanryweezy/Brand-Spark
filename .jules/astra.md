@@ -23,3 +23,7 @@
 ## 2026-08-20 - Prevent Silent 500 Errors in Plain Text Generation
 **Learning:** For endpoints generating plain string output (like social posts or generic text), failing to explicitly instruct the model to exclude markdown formatting or preamble often results in corrupt string generation. If an exception happens, simply throwing a raw 500 error causes silent application/UI failures and bad UX.
 **Action:** Always add "Do not include markdown, preamble, or commentary." to simple text generation prompts. Always wrap the AI call in a try/catch, log the exception, and return a clean, on-brand generic string fallback that strictly fulfills the endpoint's string contract format instead of letting raw 500 errors reach the user.
+
+## 2023-11-09 - Validate array item elements during JSON parsing
+**Learning:** Checking that `json.loads` returns a list is necessary but not sufficient. AI models occasionally return lists of arbitrary elements (e.g., list of strings instead of dicts) when complex JSON schemas are requested.
+**Action:** When validating AI-generated JSON arrays, iterate through the parsed list and explicitly verify that the inner items have the expected type (e.g. `dict`) and contain the minimum required structural keys before accepting the response.
