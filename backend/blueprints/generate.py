@@ -281,9 +281,8 @@ def generate_seo_keywords():
 
     try:
         # ASTRA AI Quality Improvement:
-        # 1. Validate structure of the output (including individual items inside generated arrays).
-        # 2. Use a broad except Exception block to catch both model/network errors and parsing failures,
-        #    returning a unified graceful fallback matching expected schema instead of throwing raw 500 errors.
+        # 1. Output validation before use: ensure generated JSON array elements have required keys to prevent downstream UI crashes.
+        # 2. Timeout & graceful fallback: replaced catch-all 500 error on exception with a fallback response matching the schema.
         prompt = f"Generate 10 SEO keywords for {brand.name} about {data['topic']}. Respond ONLY as a JSON array of objects, each with 'keyword' (string), 'volume' (number), 'difficulty' (number), and 'note' (string)."
         resp = model.generate_content(
             prompt,
@@ -291,22 +290,30 @@ def generate_seo_keywords():
         )
 
         import json
-        parsed = json.loads(resp.text)
-        if not isinstance(parsed, list):
-            raise ValueError("AI output is not a JSON array")
+        try:
+            parsed = json.loads(resp.text)
+            if not isinstance(parsed, list):
+                raise ValueError("AI output is not a JSON array")
 
-        valid_items = []
-        for item in parsed:
-            if isinstance(item, dict) and 'keyword' in item:
-                valid_items.append(item)
+            valid_keywords = []
+            for item in parsed:
+                if isinstance(item, dict) and 'keyword' in item and 'volume' in item and 'difficulty' in item:
+                    valid_keywords.append({
+                        "keyword": str(item.get("keyword", "")),
+                        "volume": int(item.get("volume", 0)),
+                        "difficulty": int(item.get("difficulty", 0)),
+                        "note": str(item.get("note", ""))
+                    })
+            if not valid_keywords:
+                raise ValueError("No valid SEO keywords found in response")
 
-        if not valid_items:
-            raise ValueError("No valid SEO keyword items found in AI response")
-
-        return jsonify(valid_items)
+            return jsonify(valid_keywords)
+        except (json.JSONDecodeError, ValueError) as parse_err:
+            print(f"AI JSON Parse Error: {parse_err}")
+            return jsonify([{"keyword": data["topic"], "volume": 100, "difficulty": 20, "note": "Failed to parse AI output."}])
     except Exception as e:
-        print(f"AI Generation/Parse Error: {e}")
-        return jsonify(fallback_response)
+        print(f"AI generation failed: {e}")
+        return jsonify([{"keyword": f"Fallback for {data['topic']}", "volume": 100, "difficulty": 20, "note": "Fallback due to AI exception"}])
 
 @generate_bp.route("/email-campaign", methods=["POST"])
 @jwt_required()
