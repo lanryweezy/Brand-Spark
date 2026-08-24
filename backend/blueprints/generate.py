@@ -347,23 +347,19 @@ def generate_email_campaign():
             generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
         )
 
-        import json
-        try:
-            parsed = json.loads(resp.text)
-            if not isinstance(parsed, dict) or 'subject' not in parsed or 'body' not in parsed:
-                raise ValueError("AI output missing required 'subject' or 'body' fields")
-            return jsonify({
-                "subject": str(parsed['subject']),
-                "body": str(parsed['body'])
-            })
-        except (json.JSONDecodeError, ValueError) as parse_err:
-            print(f"AI JSON Parse Error: {parse_err}")
-            return jsonify({
-                "subject": f"{brand.name} Update",
-                "body": "Could not generate email content correctly. Please try again."
-            })
+        parsed = json.loads(resp.text)
+        if not isinstance(parsed, dict) or 'subject' not in parsed or 'body' not in parsed:
+            raise ValueError("AI output missing required 'subject' or 'body' fields")
+        return jsonify({
+            "subject": str(parsed['subject']),
+            "body": str(parsed['body'])
+        })
     except Exception as e:
-        return jsonify({"error": f"AI generation failed: {str(e)}"}), 500
+        print(f"AI Error in generate_email_campaign: {e}")
+        return jsonify({
+            "subject": f"{brand.name} Update",
+            "body": "Could not generate email content correctly. Please try again."
+        })
 
 @generate_bp.route("/tags", methods=["POST"])
 @jwt_required()
@@ -389,14 +385,10 @@ def generate_tags():
             generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
         )
 
-        import json
-        try:
-            parsed = json.loads(resp.text)
-            if not isinstance(parsed, list):
-                raise ValueError("AI output is not a JSON array")
-            return jsonify(parsed)
-        except (json.JSONDecodeError, ValueError) as parse_err:
-            print(f"AI JSON Parse Error: {parse_err}")
-            return jsonify(["content", "marketing", "tags"])
+        parsed = json.loads(resp.text)
+        if not isinstance(parsed, list):
+            raise ValueError("AI output is not a JSON array")
+        return jsonify(parsed)
     except Exception as e:
-        return jsonify({"error": f"AI generation failed: {str(e)}"}), 500
+        print(f"AI Error in generate_tags: {e}")
+        return jsonify(["content", "marketing", "tags"])

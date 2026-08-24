@@ -43,3 +43,4 @@ coverage/
 # Temporary files
 *.tmp
 *.tempbackend/instance/brandspark.db
+backend/instance/*.db
