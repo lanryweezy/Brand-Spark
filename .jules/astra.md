@@ -33,3 +33,6 @@
 ## 2023-11-09 - Validate array item elements during JSON parsing
 **Learning:** Checking that `json.loads` returns a list is necessary but not sufficient. AI models occasionally return lists of arbitrary elements (e.g., list of strings instead of dicts) when complex JSON schemas are requested.
 **Action:** When validating AI-generated JSON arrays, iterate through the parsed list and explicitly verify that the inner items have the expected type (e.g. `dict`) and contain the minimum required structural keys before accepting the response.
+## 2024-08-24 - Unified AI Error Handling for Graceful Fallbacks
+**Learning:** For AI integrations where multiple potential failures exist (e.g., model 500 exceptions and structured JSON parse exceptions), nested `try/catch` blocks often inadvertently leak raw generative model exceptions up to generic 500 endpoint handlers, breaking UI flows that rely on deterministic data shapes.
+**Action:** Replace nested error handling with a single broad `except Exception` block that catches both the generative model errors and the parsing errors. Use this unified block to return a single, cleanly formatted fallback response that strictly adheres to the client's expected schema shape.
