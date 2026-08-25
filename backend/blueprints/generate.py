@@ -107,7 +107,7 @@ Generate the post content only. Do not include markdown, preamble, or commentary
 """
 
     try:
-        response = model.generate_content(prompt)
+        response = model.generate_content(prompt, request_options={'timeout': 10.0})
         return jsonify(response.text.strip())
     except Exception as e:
         print(f"AI Error in generate_social_post: {e}")
@@ -154,7 +154,7 @@ Do not include markdown, preamble, or commentary.
 """
 
     try:
-        response = model.generate_content(final_prompt)
+        response = model.generate_content(final_prompt, request_options={'timeout': 10.0})
         return jsonify({"generated_text": response.text.strip()})
     except Exception as e:
         print(f"Error during AI text generation: {e}")
@@ -192,7 +192,8 @@ def generate_blog_ideas():
         )
         resp = model.generate_content(
             prompt,
-            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
+            generation_config=genai.types.GenerationConfig(response_mime_type="application/json"),
+            request_options={"timeout": 10.0}
         )
 
         parsed_data = json.loads(resp.text)
@@ -251,7 +252,7 @@ def generate_ad_copy():
             f"Tone: {data['tone']}. "
             "Return ONLY the ad copy text. Do not include markdown, preamble, or commentary."
         )
-        resp = model.generate_content(prompt)
+        resp = model.generate_content(prompt, request_options={'timeout': 10.0})
         return jsonify(resp.text.strip())
     except Exception as e:
         print(f"AI Error in generate_ad_copy: {e}")
@@ -286,7 +287,8 @@ def generate_seo_keywords():
         prompt = f"Generate 10 SEO keywords for {brand.name} about {data['topic']}. Respond ONLY as a JSON array of objects, each with 'keyword' (string), 'volume' (number), 'difficulty' (number), and 'note' (string)."
         resp = model.generate_content(
             prompt,
-            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
+            generation_config=genai.types.GenerationConfig(response_mime_type="application/json"),
+            request_options={"timeout": 10.0}
         )
 
         import json
@@ -344,7 +346,8 @@ def generate_email_campaign():
         )
         resp = model.generate_content(
             prompt,
-            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
+            generation_config=genai.types.GenerationConfig(response_mime_type="application/json"),
+            request_options={"timeout": 10.0}
         )
 
         parsed = json.loads(resp.text)
@@ -382,7 +385,8 @@ def generate_tags():
         prompt = f"Suggest 5 tags for content type {data['type']}. Content:\n{data['content']}\nReturn ONLY a JSON array of strings."
         resp = model.generate_content(
             prompt,
-            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
+            generation_config=genai.types.GenerationConfig(response_mime_type="application/json"),
+            request_options={"timeout": 10.0}
         )
 
         parsed = json.loads(resp.text)

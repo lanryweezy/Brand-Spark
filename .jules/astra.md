@@ -36,3 +36,6 @@
 ## 2024-08-24 - Unified AI Error Handling for Graceful Fallbacks
 **Learning:** For AI integrations where multiple potential failures exist (e.g., model 500 exceptions and structured JSON parse exceptions), nested `try/catch` blocks often inadvertently leak raw generative model exceptions up to generic 500 endpoint handlers, breaking UI flows that rely on deterministic data shapes.
 **Action:** Replace nested error handling with a single broad `except Exception` block that catches both the generative model errors and the parsing errors. Use this unified block to return a single, cleanly formatted fallback response that strictly adheres to the client's expected schema shape.
+## 2026-08-25 - Prevent Silent AI Hangs
+**Learning:** Unguarded calls to `model.generate_content()` without a timeout can block the server indefinitely if the AI provider hangs, leading to a degraded user experience or 504 timeouts at the load balancer.
+**Action:** Always include a timeout configuration, such as `request_options={'timeout': 10.0}`, to ensure requests fail loudly and can be handled gracefully by existing fallback logic.
