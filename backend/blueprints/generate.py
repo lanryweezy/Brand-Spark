@@ -93,6 +93,7 @@ def generate_social_post():
     # ASTRA AI Quality Improvement:
     # 1. Added explicit negative constraints against markdown and preamble.
     # 2. Added graceful fallback on exception instead of surfacing raw 500 errors.
+    # 3. Added explicit timeout to prevent silent server hangs.
     prompt = f"""
 You are an expert social media manager. Generate a social media post for the following brand.
 
@@ -107,7 +108,7 @@ Generate the post content only. Do not include markdown, preamble, or commentary
 """
 
     try:
-        response = model.generate_content(prompt)
+        response = model.generate_content(prompt, request_options={'timeout': 10.0})
         return jsonify(response.text.strip())
     except Exception as e:
         print(f"AI Error in generate_social_post: {e}")
@@ -137,6 +138,7 @@ def generate_text():
     # ASTRA AI Quality Improvement:
     # 1. Added explicit negative constraints against markdown and preamble.
     # 2. Added graceful fallback on exception instead of surfacing raw 500 errors.
+    # 3. Added explicit timeout to prevent silent server hangs.
     final_prompt = f"""
 You are an AI assistant for a marketing team. Your task is to generate text based on the user's prompt, while adhering to the specified brand's identity.
 
@@ -154,7 +156,7 @@ Do not include markdown, preamble, or commentary.
 """
 
     try:
-        response = model.generate_content(final_prompt)
+        response = model.generate_content(final_prompt, request_options={'timeout': 10.0})
         return jsonify({"generated_text": response.text.strip()})
     except Exception as e:
         print(f"Error during AI text generation: {e}")
@@ -185,6 +187,7 @@ def generate_blog_ideas():
         # 1. Enforced JSON generation via response_mime_type instead of manual markdown stripping
         # 2. Replaced dead/unreachable prompt duplicate with explicit validation of structure
         # 3. Provided unified robust fallback on exception instead of raw 500 errors
+        # 4. Added explicit timeout to prevent silent server hangs.
         prompt = (
             f"Generate 5 blog ideas for brand {brand.name} about: {data['topic']}. "
             "Respond ONLY with a valid JSON array of objects. "
@@ -192,7 +195,8 @@ def generate_blog_ideas():
         )
         resp = model.generate_content(
             prompt,
-            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
+            generation_config=genai.types.GenerationConfig(response_mime_type="application/json"),
+            request_options={'timeout': 10.0}
         )
 
         parsed_data = json.loads(resp.text)
@@ -244,6 +248,7 @@ def generate_ad_copy():
         # 1. Expanded vague prompt with clear role and output constraints.
         # 2. Added explicit negative constraints against markdown and preamble.
         # 3. Added graceful fallback on exception instead of surfacing raw 500 errors.
+        # 4. Added explicit timeout to prevent silent server hangs.
         prompt = (
             f"You are an expert copywriter. Write a short ad copy for {brand.name}. "
             f"Product: {data['product']}. "
@@ -251,7 +256,7 @@ def generate_ad_copy():
             f"Tone: {data['tone']}. "
             "Return ONLY the ad copy text. Do not include markdown, preamble, or commentary."
         )
-        resp = model.generate_content(prompt)
+        resp = model.generate_content(prompt, request_options={'timeout': 10.0})
         return jsonify(resp.text.strip())
     except Exception as e:
         print(f"AI Error in generate_ad_copy: {e}")
@@ -283,10 +288,12 @@ def generate_seo_keywords():
         # ASTRA AI Quality Improvement:
         # 1. Output validation before use: ensure generated JSON array elements have required keys to prevent downstream UI crashes.
         # 2. Timeout & graceful fallback: replaced catch-all 500 error on exception with a fallback response matching the schema.
+        # 3. Added explicit timeout to prevent silent server hangs.
         prompt = f"Generate 10 SEO keywords for {brand.name} about {data['topic']}. Respond ONLY as a JSON array of objects, each with 'keyword' (string), 'volume' (number), 'difficulty' (number), and 'note' (string)."
         resp = model.generate_content(
             prompt,
-            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
+            generation_config=genai.types.GenerationConfig(response_mime_type="application/json"),
+            request_options={'timeout': 10.0}
         )
 
         import json
@@ -337,6 +344,7 @@ def generate_email_campaign():
         # 1. Added explicit JSON output instructions for multi-part text (subject + body).
         # 2. Used generation_config with response_mime_type to enforce JSON.
         # 3. Added safe JSON parsing to avoid silent failure of dropping the generated subject.
+        # 4. Added explicit timeout to prevent silent server hangs.
         prompt = (
             f"Create an email campaign for {brand.name}. Goal: {data['goal']}. "
             f"Product info: {data['productInfo']}. Tone: {data['tone']}. "
@@ -344,7 +352,8 @@ def generate_email_campaign():
         )
         resp = model.generate_content(
             prompt,
-            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
+            generation_config=genai.types.GenerationConfig(response_mime_type="application/json"),
+            request_options={'timeout': 10.0}
         )
 
         parsed = json.loads(resp.text)
@@ -379,10 +388,12 @@ def generate_tags():
         # 1. Added explicit JSON output instructions and used response_mime_type to enforce JSON array output.
         # 2. Replaced hardcoded dummy response with safe JSON parsing of actual model output.
         # 3. Provided graceful fallback structure for parse failures.
+        # 4. Added explicit timeout to prevent silent server hangs.
         prompt = f"Suggest 5 tags for content type {data['type']}. Content:\n{data['content']}\nReturn ONLY a JSON array of strings."
         resp = model.generate_content(
             prompt,
-            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
+            generation_config=genai.types.GenerationConfig(response_mime_type="application/json"),
+            request_options={'timeout': 10.0}
         )
 
         parsed = json.loads(resp.text)
