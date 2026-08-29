@@ -389,6 +389,7 @@ def generate_tags():
         # 2. Replaced hardcoded dummy response with safe JSON parsing of actual model output.
         # 3. Provided graceful fallback structure for parse failures.
         # 4. Added explicit timeout to prevent silent server hangs.
+        # 5. Validate array elements: ensure inner items are strings to prevent UI crashes on hallucinatory AI array structures.
         prompt = f"Suggest 5 tags for content type {data['type']}. Content:\n{data['content']}\nReturn ONLY a JSON array of strings."
         resp = model.generate_content(
             prompt,
@@ -399,7 +400,12 @@ def generate_tags():
         parsed = json.loads(resp.text)
         if not isinstance(parsed, list):
             raise ValueError("AI output is not a JSON array")
-        return jsonify(parsed)
+
+        valid_tags = [str(item) for item in parsed if isinstance(item, (str, int))]
+        if not valid_tags:
+            raise ValueError("No valid string tags found in response")
+
+        return jsonify(valid_tags)
     except Exception as e:
         print(f"AI Error in generate_tags: {e}")
         return jsonify(["content", "marketing", "tags"])
