@@ -411,7 +411,12 @@ def generate_tags():
         parsed = json.loads(resp.text)
         if not isinstance(parsed, list):
             raise ValueError("AI output is not a JSON array")
-        return jsonify(parsed)
+
+        valid_tags = [str(item) for item in parsed if isinstance(item, (str, int))]
+        if not valid_tags:
+            raise ValueError("No valid string tags found in response")
+
+        return jsonify(valid_tags)
     except Exception as e:
         print(f"AI Error in generate_tags: {e}")
         return jsonify(["content", "marketing", "tags"])
