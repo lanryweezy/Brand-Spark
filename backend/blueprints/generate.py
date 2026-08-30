@@ -5,6 +5,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 import google.generativeai as genai
 
 from marshmallow import Schema, fields, ValidationError
+import time
 
 try:
     from models import Brand, User
@@ -67,6 +68,30 @@ def get_brand_for_user(user_id: str, brand_id: str):
         return None, "Brand not found or access denied"
     return brand, None
 
+def call_ai_with_retry(prompt, generation_config=None, request_options=None, max_retries=3):
+    """
+    ASTRA AI Quality Improvement:
+    Added retry with exponential backoff for transient API errors (like 429/500).
+    This ensures spurious AI provider failures don't cause silent drops or raw 500s.
+    """
+    last_exception = None
+    for attempt in range(max_retries):
+        try:
+            kwargs = {}
+            if generation_config:
+                kwargs['generation_config'] = generation_config
+            if request_options:
+                kwargs['request_options'] = request_options
+            return model.generate_content(prompt, **kwargs)
+        except Exception as e:
+            last_exception = e
+            # Google generative AI can wrap HTTP errors in standard Exceptions or google.api_core exceptions
+            if any(term in str(e) for term in ['429', '500', '503', 'TooManyRequests', 'InternalServerError', 'ServiceUnavailable', 'ResourceExhausted']):
+                time.sleep(2 ** attempt)  # Exponential backoff: 1s, 2s, 4s
+            else:
+                raise e # Don't retry on things like auth errors or 400 bad request
+    raise last_exception
+
 # Endpoints
 @generate_bp.route("/social-post", methods=["POST"])
 @jwt_required()
@@ -108,7 +133,7 @@ Generate the post content only. Do not include markdown, preamble, or commentary
 """
 
     try:
-        response = model.generate_content(prompt, request_options={'timeout': 10.0})
+        response = call_ai_with_retry(prompt, request_options={'timeout': 10.0})
         return jsonify(response.text.strip())
     except Exception as e:
         print(f"AI Error in generate_social_post: {e}")
@@ -161,7 +186,7 @@ Do not include markdown, preamble, or commentary.
 """
 
     try:
-        response = model.generate_content(final_prompt, request_options={'timeout': 10.0})
+        response = call_ai_with_retry(final_prompt, request_options={'timeout': 10.0})
         return jsonify({"generated_text": response.text.strip()})
     except Exception as e:
         print(f"Error during AI text generation: {e}")

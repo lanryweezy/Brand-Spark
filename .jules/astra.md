@@ -44,3 +44,7 @@
 ## 2024-03-27 - Mitigating Prompt Injection and Improving Context Efficiency
 **Learning:** Raw user input embedded directly in prompts creates severe prompt injection vulnerabilities where users can bypass system instructions. Additionally, passing visual context (like colors) to text generation tasks wastes tokens without improving output quality.
 **Action:** Always wrap untrusted user input in explicit XML tags (like `<user_input>`) and instruct the model to treat the contents strictly as data, not commands. Audit prompts to remove low-signal context fields that are irrelevant to the specific task.
+
+## 2024-10-24 - Transient API Error Handling
+**Learning:** Google Generative AI API calls can frequently fail with transient HTTP errors (e.g., 429 TooManyRequests or 500 InternalServerError). Simply wrapping the call in a try/catch and returning a graceful fallback is insufficient, as it leads to spurious failures for the user.
+**Action:** Always wrap `model.generate_content` calls in a retry loop using exponential backoff (e.g., `call_ai_with_retry`) to handle `ResourceExhausted` and `InternalServerError` gracefully, ensuring a more resilient AI integration.
