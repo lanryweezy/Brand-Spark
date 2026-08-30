@@ -44,6 +44,9 @@
 **Learning:** Calling `model.generate_content()` without an explicit timeout can lead to the server thread blocking indefinitely if the LLM provider experiences network issues or severe latency, causing silent cascading failures in the API.
 **Action:** Always include an explicit timeout when making generative API calls (e.g., `request_options={'timeout': 10.0}`) so the application can fail fast, catch the resulting exception, and return a graceful fallback response to the user.
 
+## 2024-05-18 - Prompt Injection Mitigation and Context Efficiency
+**Learning:** Raw user input in prompts presents an injection risk. Furthermore, including irrelevant UI details like brand color schemes wastes tokens in text-generation tasks.
+**Action:** When handling untrusted user input, wrap it in explicit XML tags (like `<user_input>`) and instruct the model to treat the contents strictly as data, not commands. Additionally, improve context efficiency by systematically omitting low-signal context fields that are irrelevant to the specific task.
 ## 2024-03-27 - Mitigating Prompt Injection and Improving Context Efficiency
 **Learning:** Raw user input embedded directly in prompts creates severe prompt injection vulnerabilities where users can bypass system instructions. Additionally, passing visual context (like colors) to text generation tasks wastes tokens without improving output quality.
 **Action:** Always wrap untrusted user input in explicit XML tags (like `<user_input>`) and instruct the model to treat the contents strictly as data, not commands. Audit prompts to remove low-signal context fields that are irrelevant to the specific task.
