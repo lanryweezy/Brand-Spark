@@ -226,7 +226,7 @@ def generate_blog_ideas():
             "Respond ONLY with a valid JSON array of objects. "
             "Each object must have exactly two keys: 'title' (string) and 'outline' (string)."
         )
-        resp = model.generate_content(
+        resp = call_ai_with_retry(
             prompt,
             generation_config=genai.types.GenerationConfig(response_mime_type="application/json"),
             request_options={'timeout': 10.0}
@@ -289,7 +289,7 @@ def generate_ad_copy():
             f"Tone: {data['tone']}. "
             "Return ONLY the ad copy text. Do not include markdown, preamble, or commentary."
         )
-        resp = model.generate_content(prompt, request_options={'timeout': 10.0})
+        resp = call_ai_with_retry(prompt, request_options={'timeout': 10.0})
         return jsonify(resp.text.strip())
     except Exception as e:
         print(f"AI Error in generate_ad_copy: {e}")
@@ -323,7 +323,7 @@ def generate_seo_keywords():
         # 2. Timeout & graceful fallback: replaced catch-all 500 error on exception with a fallback response matching the schema.
         # 3. Added explicit timeout to prevent silent server hangs.
         prompt = f"Generate 10 SEO keywords for {brand.name} about {data['topic']}. Respond ONLY as a JSON array of objects, each with 'keyword' (string), 'volume' (number), 'difficulty' (number), and 'note' (string)."
-        resp = model.generate_content(
+        resp = call_ai_with_retry(
             prompt,
             generation_config=genai.types.GenerationConfig(response_mime_type="application/json"),
             request_options={'timeout': 10.0}
@@ -383,7 +383,7 @@ def generate_email_campaign():
             f"Product info: {data['productInfo']}. Tone: {data['tone']}. "
             "Respond ONLY as a JSON object with two string fields: 'subject' and 'body'."
         )
-        resp = model.generate_content(
+        resp = call_ai_with_retry(
             prompt,
             generation_config=genai.types.GenerationConfig(response_mime_type="application/json"),
             request_options={'timeout': 10.0}
@@ -430,7 +430,7 @@ def generate_tags():
             f"<content>\n{data['content']}\n</content>\n"
             "Return ONLY a JSON array of strings."
         )
-        resp = model.generate_content(
+        resp = call_ai_with_retry(
             prompt,
             generation_config=genai.types.GenerationConfig(response_mime_type="application/json"),
             request_options={'timeout': 10.0}

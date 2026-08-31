@@ -54,3 +54,6 @@
 ## 2024-10-24 - Transient API Error Handling
 **Learning:** Google Generative AI API calls can frequently fail with transient HTTP errors (e.g., 429 TooManyRequests or 500 InternalServerError). Simply wrapping the call in a try/catch and returning a graceful fallback is insufficient, as it leads to spurious failures for the user.
 **Action:** Always wrap `model.generate_content` calls in a retry loop using exponential backoff (e.g., `call_ai_with_retry`) to handle `ResourceExhausted` and `InternalServerError` gracefully, ensuring a more resilient AI integration.
+## 2024-10-25 - Apply Exponential Backoff Consistently
+**Learning:** Adding retry logic to a single helper function (`call_ai_with_retry`) is only effective if all AI generation endpoints consistently use that helper. Failing to replace direct `model.generate_content` calls with the retry wrapper leaves several endpoints vulnerable to transient API failures, leading to spurious fallbacks.
+**Action:** Ensure that all direct API calls to the generative model across the codebase are refactored to use the central retry wrapper (e.g., `call_ai_with_retry`) so that failure resilience with exponential backoff is applied uniformly.
