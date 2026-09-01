@@ -44,3 +44,4 @@ coverage/
 *.tmp
 *.tempbackend/instance/brandspark.db
 backend/instance/*.db
+backend/instance/*.db
