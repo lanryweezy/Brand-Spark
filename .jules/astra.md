@@ -57,3 +57,7 @@
 ## 2024-10-25 - Apply Exponential Backoff Consistently
 **Learning:** Adding retry logic to a single helper function (`call_ai_with_retry`) is only effective if all AI generation endpoints consistently use that helper. Failing to replace direct `model.generate_content` calls with the retry wrapper leaves several endpoints vulnerable to transient API failures, leading to spurious fallbacks.
 **Action:** Ensure that all direct API calls to the generative model across the codebase are refactored to use the central retry wrapper (e.g., `call_ai_with_retry`) so that failure resilience with exponential backoff is applied uniformly.
+
+## 2025-02-25 - Mitigating Prompt Injection for Multi-field User Inputs
+**Learning:** When a prompt combines multiple fields from user input (e.g., `platform`, `product`, `audience`, `tone`), inserting them plainly in text (e.g., "Platform: {data['platform']}") opens multiple vectors for prompt injection where users can hijack the AI's instruction flow.
+**Action:** Always wrap all untrusted multi-field user inputs in clear XML tags (e.g., `<product>{...}</product>`) and explicitly instruct the model to treat the contents strictly as data to process, rather than commands.
