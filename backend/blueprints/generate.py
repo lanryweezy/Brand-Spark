@@ -338,12 +338,16 @@ def generate_seo_keywords():
             valid_keywords = []
             for item in parsed:
                 if isinstance(item, dict) and 'keyword' in item and 'volume' in item and 'difficulty' in item:
-                    valid_keywords.append({
-                        "keyword": str(item.get("keyword", "")),
-                        "volume": int(item.get("volume", 0)),
-                        "difficulty": int(item.get("difficulty", 0)),
-                        "note": str(item.get("note", ""))
-                    })
+                    try:
+                        valid_keywords.append({
+                            "keyword": str(item.get("keyword", "")),
+                            "volume": int(item.get("volume", 0)),
+                            "difficulty": int(item.get("difficulty", 0)),
+                            "note": str(item.get("note", ""))
+                        })
+                    except (ValueError, TypeError):
+                        # Skip malformed items rather than failing the whole response
+                        continue
             if not valid_keywords:
                 raise ValueError("No valid SEO keywords found in response")
 
