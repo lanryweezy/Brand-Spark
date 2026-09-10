@@ -57,3 +57,7 @@
 ## 2024-10-25 - Apply Exponential Backoff Consistently
 **Learning:** Adding retry logic to a single helper function (`call_ai_with_retry`) is only effective if all AI generation endpoints consistently use that helper. Failing to replace direct `model.generate_content` calls with the retry wrapper leaves several endpoints vulnerable to transient API failures, leading to spurious fallbacks.
 **Action:** Ensure that all direct API calls to the generative model across the codebase are refactored to use the central retry wrapper (e.g., `call_ai_with_retry`) so that failure resilience with exponential backoff is applied uniformly.
+
+## 2023-11-10 - Robust Array Parsing
+**Learning:** Checking the structure of an AI-generated array item using `isinstance(item, dict)` is not enough if you later cast types (e.g., `int(item["volume"])`). If the AI hallucinates a string instead of a number for a single item in the array, `int()` will throw a `ValueError` or `TypeError`, skipping all remaining valid items.
+**Action:** When casting types on items inside an AI-generated JSON array, wrap the casting in a `try/except (ValueError, TypeError)` block directly inside the parsing loop. This ensures that a single hallucinated or malformed item does not throw an exception that discards the entire array of valid items.
