@@ -61,3 +61,7 @@
 ## 2024-05-18 - Graceful Parsing of AI Arrays
 **Learning:** When generating JSON arrays of structured objects with an LLM, the model occasionally hallucinates types for specific fields in a single item (e.g., returning `"volume": "high"` instead of `1000`). Using a raw casting loop (e.g. `int(item["volume"])`) without an inner exception block causes a `ValueError` that discards the *entire array* of otherwise valid items, causing a silent UI crash or a fallback response.
 **Action:** Wrap the extraction and type-casting of individual items within AI-generated arrays in an explicit `try/except (ValueError, TypeError)` block directly inside the loop. This ensures malformed items are skipped while successfully preserving the well-formed items.
+
+## 2026-09-13 - Mitigating Prompt Injection in Ad Copy Generation
+**Learning:** Raw user input in prompts presents a significant injection risk, even for simple generation tasks like ad copy. Failing to sanitize these inputs can allow users to manipulate the model's output or bypass safety constraints.
+**Action:** When handling untrusted user input in prompt templates, ALWAYS wrap it in explicit XML tags (like `<user_input>`) and instruct the model to treat the contents strictly as data to be processed, not as commands.
