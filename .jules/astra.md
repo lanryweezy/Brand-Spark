@@ -61,3 +61,6 @@
 ## 2024-05-18 - Graceful Parsing of AI Arrays
 **Learning:** When generating JSON arrays of structured objects with an LLM, the model occasionally hallucinates types for specific fields in a single item (e.g., returning `"volume": "high"` instead of `1000`). Using a raw casting loop (e.g. `int(item["volume"])`) without an inner exception block causes a `ValueError` that discards the *entire array* of otherwise valid items, causing a silent UI crash or a fallback response.
 **Action:** Wrap the extraction and type-casting of individual items within AI-generated arrays in an explicit `try/except (ValueError, TypeError)` block directly inside the loop. This ensures malformed items are skipped while successfully preserving the well-formed items.
+## 2026-09-14 - Robust Prompt Formatting to Prevent Prompt Injection
+**Learning:** Concatenating user inputs directly into prompt strings presents a prompt injection risk where unexpected input formatting can hijack instructions. This is especially risky in text generation endpoints like ad copy and email generation.
+**Action:** Always wrap user-provided fields in explicit XML tags (e.g. `<user_input>`) and explicitly instruct the model to treat the content within those tags strictly as data to process, avoiding injection vulnerabilities.
