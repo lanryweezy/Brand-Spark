@@ -64,3 +64,7 @@
 ## 2026-09-14 - Robust Prompt Formatting to Prevent Prompt Injection
 **Learning:** Concatenating user inputs directly into prompt strings presents a prompt injection risk where unexpected input formatting can hijack instructions. This is especially risky in text generation endpoints like ad copy and email generation.
 **Action:** Always wrap user-provided fields in explicit XML tags (e.g. `<user_input>`) and explicitly instruct the model to treat the content within those tags strictly as data to process, avoiding injection vulnerabilities.
+
+## 2026-10-15 - Prompt Injection Mitigation and Role Definition in Structured Generation
+**Learning:** Hardcoding user-provided text (like a blog or SEO topic) directly into generating instructions introduces prompt injection risks. Without specific XML barriers, the user could inject instructions to circumvent the target schema or alter behavior. Furthermore, omitting an explicit role/persona in complex generation endpoints (like blog ideation or SEO analysis) leads to lower-quality outputs, as the model defaults to a generic tone.
+**Action:** When incorporating single, unbounded user-input fields in text generation endpoints, always wrap them in `<user_input>` XML tags and explicitly instruct the model to treat the content inside as strictly data. Additionally, ensure complex generation endpoints have a clearly defined persona (e.g., "You are an expert SEO strategist") to maximize output quality.
