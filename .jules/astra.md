@@ -64,3 +64,6 @@
 ## 2026-09-14 - Robust Prompt Formatting to Prevent Prompt Injection
 **Learning:** Concatenating user inputs directly into prompt strings presents a prompt injection risk where unexpected input formatting can hijack instructions. This is especially risky in text generation endpoints like ad copy and email generation.
 **Action:** Always wrap user-provided fields in explicit XML tags (e.g. `<user_input>`) and explicitly instruct the model to treat the content within those tags strictly as data to process, avoiding injection vulnerabilities.
+## 2024-10-26 - Prompt Injection Mitigation in Text Generators
+**Learning:** Text generation endpoints that embed raw user input directly into the prompt string are highly vulnerable to prompt injection, where a user can hijack instructions (e.g., bypass JSON formatting). This is particularly risky when concatenating variables like `data['topic']` directly.
+**Action:** When handling user input in prompt strings, always wrap the untrusted input in explicit XML tags (like `<user_input>`) and append explicit instructions telling the model to treat the content within those tags strictly as data to process, avoiding execution of embedded instructions.
