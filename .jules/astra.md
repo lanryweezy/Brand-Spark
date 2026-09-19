@@ -64,3 +64,7 @@
 ## 2026-09-14 - Robust Prompt Formatting to Prevent Prompt Injection
 **Learning:** Concatenating user inputs directly into prompt strings presents a prompt injection risk where unexpected input formatting can hijack instructions. This is especially risky in text generation endpoints like ad copy and email generation.
 **Action:** Always wrap user-provided fields in explicit XML tags (e.g. `<user_input>`) and explicitly instruct the model to treat the content within those tags strictly as data to process, avoiding injection vulnerabilities.
+
+## 2025-02-25 - Safely Accessing AI Response Text
+**Learning:** When using the `google.generativeai` SDK, accessing `response.text` can occasionally raise a `ValueError` if the AI model returns an empty response or is blocked by its internal safety filters. If this access is not wrapped in a specific exception handler, it will bubble up and cause a 500 error instead of a graceful fallback.
+**Action:** Always wrap the `.text` property access in a `try...except ValueError` block when reading generative AI responses. This safely handles content blocked by safety filters or empty responses, explicitly differentiating these refusals from standard HTTP failures or JSON parse errors, allowing the rest of the application's unified fallback logic to handle the rejection gracefully.
