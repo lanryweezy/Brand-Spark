@@ -10,6 +10,76 @@ def client():
     with app.test_client() as client:
         yield client
 
+def test_generate_blog_ideas(client, monkeypatch):
+    # Mock get_brand_for_user
+    monkeypatch.setattr('blueprints.generate.get_brand_for_user', lambda u, b: (type('Brand', (), {'name': 'Test Brand'}), None))
+
+    # Mock model generation
+    class MockResponse:
+        def __init__(self, text):
+            self.text = text
+
+    class MockModel:
+        def generate_content(self, *args, **kwargs):
+            return MockResponse(json.dumps([
+                {"title": "Idea 1", "outline": "Outline 1"},
+                {"title": "Idea 2", "outline": "Outline 2"}
+            ]))
+
+    monkeypatch.setattr('blueprints.generate.model', MockModel())
+
+    with app.app_context():
+        access_token = create_access_token(identity="test_user")
+
+    response = client.post('/generate/blog-ideas',
+        headers={"Authorization": f"Bearer {access_token}"},
+        json={
+            "brandId": "123",
+            "topic": "Future of AI"
+        }
+    )
+
+    data = response.get_json()
+    assert response.status_code == 200
+    assert len(data) == 2
+    assert data[0]["title"] == "Idea 1"
+
+
+def test_generate_seo_keywords_success(client, monkeypatch):
+    # Mock get_brand_for_user
+    monkeypatch.setattr('blueprints.generate.get_brand_for_user', lambda u, b: (type('Brand', (), {'name': 'Test Brand'}), None))
+
+    # Mock model generation
+    class MockResponse:
+        def __init__(self, text):
+            self.text = text
+
+    class MockModel:
+        def generate_content(self, *args, **kwargs):
+            return MockResponse(json.dumps([
+                {"keyword": "ai testing", "volume": 1200, "difficulty": 40, "note": "Great"},
+                {"keyword": "software bugs", "volume": 5000, "difficulty": 80, "note": "High competition"}
+            ]))
+
+    monkeypatch.setattr('blueprints.generate.model', MockModel())
+
+    with app.app_context():
+        access_token = create_access_token(identity="test_user")
+
+    response = client.post('/generate/seo-keywords',
+        headers={"Authorization": f"Bearer {access_token}"},
+        json={
+            "brandId": "123",
+            "topic": "Software Testing"
+        }
+    )
+
+    data = response.get_json()
+    assert response.status_code == 200
+    assert len(data) == 2
+    assert data[0]["keyword"] == "ai testing"
+
+
 def test_generate_email_campaign_error(client, monkeypatch):
     # Mock get_brand_for_user
     monkeypatch.setattr('blueprints.generate.get_brand_for_user', lambda u, b: (type('Brand', (), {'name': 'Test Brand'}), None))

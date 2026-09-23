@@ -64,3 +64,6 @@
 ## 2026-09-14 - Robust Prompt Formatting to Prevent Prompt Injection
 **Learning:** Concatenating user inputs directly into prompt strings presents a prompt injection risk where unexpected input formatting can hijack instructions. This is especially risky in text generation endpoints like ad copy and email generation.
 **Action:** Always wrap user-provided fields in explicit XML tags (e.g. `<user_input>`) and explicitly instruct the model to treat the content within those tags strictly as data to process, avoiding injection vulnerabilities.
+## 2026-09-15 - Explicit XML Tags to Mitigate Prompt Injection Risk
+**Learning:** Direct string concatenation of untrusted user input within large system prompts exposes the model to prompt injection attacks, which can bypass safety constraints or instructions.
+**Action:** Always wrap user-provided fields in explicit XML tags (e.g., `<user_input>`) and explicitly instruct the model to treat the content within those tags strictly as data to process, avoiding injection vulnerabilities. Apply this consistently across all generation endpoints.
