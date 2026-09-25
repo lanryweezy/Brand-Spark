@@ -254,10 +254,14 @@ Respond ONLY with a valid JSON array of objects. Each object must have exactly t
         valid_ideas = []
         for item in parsed_data:
             if isinstance(item, dict) and 'title' in item and 'outline' in item:
-                valid_ideas.append({
-                    "title": str(item['title']),
-                    "outline": str(item['outline'])
-                })
+                # ASTRA AI Quality Improvement:
+                # Validate the type of individual AI-generated fields to gracefully skip
+                # items with hallucinated nested structures instead of returning raw objects as strings.
+                if isinstance(item['title'], str) and isinstance(item['outline'], str):
+                    valid_ideas.append({
+                        "title": item['title'],
+                        "outline": item['outline']
+                    })
 
         if not valid_ideas:
             raise ValueError("No valid blog ideas found in response")
