@@ -69,3 +69,7 @@
 ## 2026-09-24 - Mitigate prompt injection via XML tags
 **Learning:** The application embeds raw user string fields (like topic descriptions) directly into prompts. This poses an injection risk. Wrapping the raw user string fields into `<user_input>` XML tags, while explicitly instructing the model to treat the wrapped content strictly as data, reliably sanitizes inputs and protects the expected JSON output format from manipulation.
 **Action:** When generating content based on user inputs, ensure fields like topic or prompt are wrapped in XML tags with protective instructions.
+
+## 2025-02-25 - Prevent Silent Leakage of Hallucinated AI Output via String Casting
+**Learning:** When parsing AI-generated JSON that expects string fields, explicitly validate them using `isinstance(value, str)` rather than casting with `str()`. Using `str()` will silently convert hallucinated nested objects (like unexpected dictionaries or lists) into raw stringified JSON which then leaks directly into the UI, causing confusing displays and breaking formatting.
+**Action:** Always validate expected string fields from AI JSON output using explicit type checks (e.g., `isinstance(field, str)`) before assigning them to response objects or filtering array items. For objects, raise a ValueError to trigger fallbacks; for array items, skip the malformed elements.

@@ -254,10 +254,11 @@ Respond ONLY with a valid JSON array of objects. Each object must have exactly t
         valid_ideas = []
         for item in parsed_data:
             if isinstance(item, dict) and 'title' in item and 'outline' in item:
-                valid_ideas.append({
-                    "title": str(item['title']),
-                    "outline": str(item['outline'])
-                })
+                if isinstance(item['title'], str) and isinstance(item['outline'], str):
+                    valid_ideas.append({
+                        "title": item['title'],
+                        "outline": item['outline']
+                    })
 
         if not valid_ideas:
             raise ValueError("No valid blog ideas found in response")
@@ -372,11 +373,16 @@ Respond ONLY as a JSON array of objects, each with 'keyword' (string), 'volume' 
             for item in parsed:
                 if isinstance(item, dict) and 'keyword' in item and 'volume' in item and 'difficulty' in item:
                     try:
+                        keyword = item.get("keyword", "")
+                        note = item.get("note", "")
+                        if not isinstance(keyword, str) or not isinstance(note, str):
+                            continue
+
                         valid_keywords.append({
-                            "keyword": str(item.get("keyword", "")),
+                            "keyword": keyword,
                             "volume": int(item.get("volume", 0)),
                             "difficulty": int(item.get("difficulty", 0)),
-                            "note": str(item.get("note", ""))
+                            "note": note
                         })
                     except (ValueError, TypeError):
                         # ASTRA AI Quality Improvement:
@@ -440,9 +446,13 @@ Respond ONLY as a JSON object with two string fields: 'subject' and 'body'.
         parsed = json.loads(resp.text)
         if not isinstance(parsed, dict) or 'subject' not in parsed or 'body' not in parsed:
             raise ValueError("AI output missing required 'subject' or 'body' fields")
+
+        if not isinstance(parsed['subject'], str) or not isinstance(parsed['body'], str):
+            raise ValueError("AI output contains hallucinated nested structures instead of strings")
+
         return jsonify({
-            "subject": str(parsed['subject']),
-            "body": str(parsed['body'])
+            "subject": parsed['subject'],
+            "body": parsed['body']
         })
     except Exception as e:
         print(f"AI Error in generate_email_campaign: {e}")
@@ -488,7 +498,7 @@ def generate_tags():
         if not isinstance(parsed, list):
             raise ValueError("AI output is not a JSON array")
 
-        valid_tags = [str(item) for item in parsed if isinstance(item, (str, int))]
+        valid_tags = [item for item in parsed if isinstance(item, str)]
         if not valid_tags:
             raise ValueError("No valid string tags found in response")
 
