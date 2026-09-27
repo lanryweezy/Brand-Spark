@@ -68,6 +68,20 @@ def get_brand_for_user(user_id: str, brand_id: str):
         return None, "Brand not found or access denied"
     return brand, None
 
+def safe_extract_text(response):
+    """
+    ASTRA AI Quality Improvement:
+    Safely extracts text from the Gemini response.
+    The google.generativeai SDK raises a ValueError if the response is empty or blocked by safety filters.
+    Catching this explicitly provides clearer error signals (safety block vs network failure)
+    and allows for graceful fallbacks instead of causing 500 server errors.
+    """
+    try:
+        return response.text
+    except ValueError as e:
+        print(f"AI response blocked by safety filters or empty: {e}")
+        raise ValueError("AI response blocked by safety filters or empty") from e
+
 def call_ai_with_retry(prompt, generation_config=None, request_options=None, max_retries=3):
     """
     ASTRA AI Quality Improvement:
@@ -140,7 +154,7 @@ Generate the post content only. Do not include markdown, preamble, or commentary
 
     try:
         response = call_ai_with_retry(prompt, request_options={'timeout': 10.0})
-        return jsonify(response.text.strip())
+        return jsonify(safe_extract_text(response).strip())
     except Exception as e:
         print(f"AI Error in generate_social_post: {e}")
         return jsonify(fallback_text)
@@ -196,7 +210,7 @@ Do not include markdown, preamble, or commentary.
 
     try:
         response = call_ai_with_retry(final_prompt, request_options={'timeout': 10.0})
-        return jsonify({"generated_text": response.text.strip()})
+        return jsonify({"generated_text": safe_extract_text(response).strip()})
     except Exception as e:
         print(f"Error during AI text generation: {e}")
         return jsonify({"generated_text": fallback_text})
@@ -246,7 +260,7 @@ Respond ONLY with a valid JSON array of objects. Each object must have exactly t
             request_options={'timeout': 10.0}
         )
 
-        parsed_data = json.loads(resp.text)
+        parsed_data = json.loads(safe_extract_text(resp))
 
         if not isinstance(parsed_data, list):
             raise ValueError("AI output is not a JSON array")
@@ -312,7 +326,7 @@ Tone: {data['tone']}
 Return ONLY the ad copy text. Do not include markdown, preamble, or commentary.
 """
         resp = call_ai_with_retry(prompt, request_options={'timeout': 10.0})
-        return jsonify(resp.text.strip())
+        return jsonify(safe_extract_text(resp).strip())
     except Exception as e:
         print(f"AI Error in generate_ad_copy: {e}")
         return jsonify(fallback_text)
@@ -365,7 +379,7 @@ Respond ONLY as a JSON array of objects, each with 'keyword' (string), 'volume' 
 
         import json
         try:
-            parsed = json.loads(resp.text)
+            parsed = json.loads(safe_extract_text(resp))
             if not isinstance(parsed, list):
                 raise ValueError("AI output is not a JSON array")
 
@@ -443,7 +457,7 @@ Respond ONLY as a JSON object with two string fields: 'subject' and 'body'.
             request_options={'timeout': 10.0}
         )
 
-        parsed = json.loads(resp.text)
+        parsed = json.loads(safe_extract_text(resp))
         if not isinstance(parsed, dict) or 'subject' not in parsed or 'body' not in parsed:
             raise ValueError("AI output missing required 'subject' or 'body' fields")
 
@@ -494,7 +508,7 @@ def generate_tags():
             request_options={'timeout': 10.0}
         )
 
-        parsed = json.loads(resp.text)
+        parsed = json.loads(safe_extract_text(resp))
         if not isinstance(parsed, list):
             raise ValueError("AI output is not a JSON array")
 
