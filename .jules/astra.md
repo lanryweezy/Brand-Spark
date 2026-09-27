@@ -73,3 +73,7 @@
 ## 2025-02-25 - Prevent Silent Leakage of Hallucinated AI Output via String Casting
 **Learning:** When parsing AI-generated JSON that expects string fields, explicitly validate them using `isinstance(value, str)` rather than casting with `str()`. Using `str()` will silently convert hallucinated nested objects (like unexpected dictionaries or lists) into raw stringified JSON which then leaks directly into the UI, causing confusing displays and breaking formatting.
 **Action:** Always validate expected string fields from AI JSON output using explicit type checks (e.g., `isinstance(field, str)`) before assigning them to response objects or filtering array items. For objects, raise a ValueError to trigger fallbacks; for array items, skip the malformed elements.
+
+## 2024-05-18 - [Safe AI Output Extraction]
+**Learning:** The `google.generativeai` SDK raises a `ValueError` when accessing `response.text` if the response is empty or blocked by safety filters.
+**Action:** When accessing `response.text`, wrap the access in a `try...except ValueError` block (e.g. via a `safe_extract_text` helper) to gracefully handle safety filter blocks instead of raw 500 server errors, and to clearly differentiate safety blocks from transient network errors.
