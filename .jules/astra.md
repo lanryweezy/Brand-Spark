@@ -77,3 +77,6 @@
 ## 2024-05-18 - [Safe AI Output Extraction]
 **Learning:** The `google.generativeai` SDK raises a `ValueError` when accessing `response.text` if the response is empty or blocked by safety filters.
 **Action:** When accessing `response.text`, wrap the access in a `try...except ValueError` block (e.g. via a `safe_extract_text` helper) to gracefully handle safety filter blocks instead of raw 500 server errors, and to clearly differentiate safety blocks from transient network errors.
+## 2026-09-28 - Unified AI Error Handling
+**Learning:** Nested `try/except` blocks (e.g., catching parsing errors separately from API call errors) in AI generation endpoints can inadvertently lead to unhandled edge cases or raw exceptions bubbling up if a fallback is missed in one of the blocks. It is safer to use a single broad `except Exception` block for robust fallback provision.
+**Action:** Always wrap both the generative model call and the subsequent JSON parsing in a single unified `except Exception` block. Ensure this block returns a clean fallback structure that complies with the schema expected by the frontend client.
