@@ -81,3 +81,7 @@
 ## 2026-10-25 - Prevent Nested Try/Catch from Leaking Raw AI Error Fallsbacks
 **Learning:** For AI endpoints that require both network call exception handling (like 500s or timeouts) and structured JSON parsing exception handling (like JSONDecodeError or ValueError), using nested `try/catch` blocks is an anti-pattern. Nested blocks often fail to catch failures outside their inner block's scope, unexpectedly leaking generative model exceptions up to standard 500 error handlers and breaking the frontend's expected data shape.
 **Action:** Replace nested error handling with a single unified `except Exception as e:` block. This catches both the API/network errors and the validation/parsing errors, allowing the server to reliably return a cleanly formatted, schema-compliant fallback response to the frontend in all failure states.
+
+## 2026-11-10 - Validate AI Output Ranges
+**Learning:** Checking for JSON array structure and proper types using `int()` and `str()` isn't fully protective if the values of the types can be arbitrary. Models can easily hallucinate negative search volumes or keyword difficulty scores greater than 100, which can leak into the UI causing confusing data displays.
+**Action:** When validating generated numeric values inside an AI output structure, always perform appropriate bounds/range checks before accepting the item. If the values are completely outside expected limits (e.g. `volume < 0`, `difficulty > 100`), drop the corrupted array item to prevent leaking out-of-range data.

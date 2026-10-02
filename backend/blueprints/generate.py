@@ -390,10 +390,19 @@ Respond ONLY as a JSON array of objects, each with 'keyword' (string), 'volume' 
                     if not isinstance(keyword, str) or not isinstance(note, str):
                         continue
 
+                    volume = int(item.get("volume", 0))
+                    difficulty = int(item.get("difficulty", 0))
+
+                    # ASTRA AI Quality Improvement:
+                    # Add range checks to prevent trusting model-returned numbers blindly.
+                    # Volume cannot be negative, and difficulty is typically a 0-100 score.
+                    if volume < 0 or difficulty < 0 or difficulty > 100:
+                        continue
+
                     valid_keywords.append({
                         "keyword": keyword,
-                        "volume": int(item.get("volume", 0)),
-                        "difficulty": int(item.get("difficulty", 0)),
+                        "volume": volume,
+                        "difficulty": difficulty,
                         "note": note
                     })
                 except (ValueError, TypeError):
