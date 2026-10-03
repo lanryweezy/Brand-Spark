@@ -99,3 +99,39 @@ def test_generate_tags_error(client, monkeypatch):
     data = response.get_json()
     assert response.status_code == 200
     assert data == ["content", "marketing", "tags"]
+
+def test_generate_seo_keywords_range_checks(client, monkeypatch):
+    # Mock get_brand_for_user
+    monkeypatch.setattr('blueprints.generate.get_brand_for_user', lambda u, b: (type('Brand', (), {'name': 'Test Brand'}), None))
+
+    # Mock model generation to return out-of-range numerical values
+    class MockResponse:
+        def __init__(self, text):
+            self.text = text
+
+    class MockModel:
+        def generate_content(self, *args, **kwargs):
+            return MockResponse(json.dumps([
+                {"keyword": "negative vol", "volume": -500, "difficulty": 50, "note": "bad"},
+                {"keyword": "high diff", "volume": 1000, "difficulty": 150, "note": "bad diff"},
+                {"keyword": "low diff", "volume": 200, "difficulty": -10, "note": "bad diff"},
+                {"keyword": "valid keyword", "volume": 500, "difficulty": 45, "note": "good"}
+            ]))
+
+    monkeypatch.setattr('blueprints.generate.model', MockModel())
+
+    with app.app_context():
+        access_token = create_access_token(identity="test_user")
+
+    response = client.post('/generate/seo-keywords',
+        headers={"Authorization": f"Bearer {access_token}"},
+        json={
+            "brandId": "123",
+            "topic": "Testing"
+        }
+    )
+
+    data = response.get_json()
+    assert response.status_code == 200
+    assert len(data) == 1
+    assert data[0]["keyword"] == "valid keyword"
