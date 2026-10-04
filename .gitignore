@@ -45,3 +45,4 @@ coverage/
 *.tempbackend/instance/brandspark.db
 backend/instance/*.db
 venv/
+backend/instance/*.db

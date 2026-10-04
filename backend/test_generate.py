@@ -12,7 +12,7 @@ def client():
 
 def test_generate_email_campaign_error(client, monkeypatch):
     # Mock get_brand_for_user
-    monkeypatch.setattr('blueprints.generate.get_brand_for_user', lambda u, b: (type('Brand', (), {'name': 'Test Brand'}), None))
+    monkeypatch.setattr('blueprints.generate.get_brand_for_user', lambda u, b: (type('Brand', (), {'name': 'Test Brand', 'description': 'Test Desc'}), None))
 
     # Mock model generation to raise exception
     class MockModel:
@@ -42,7 +42,7 @@ def test_generate_email_campaign_error(client, monkeypatch):
 
 def test_generate_seo_keywords_malformed_item(client, monkeypatch):
     # Mock get_brand_for_user
-    monkeypatch.setattr('blueprints.generate.get_brand_for_user', lambda u, b: (type('Brand', (), {'name': 'Test Brand'}), None))
+    monkeypatch.setattr('blueprints.generate.get_brand_for_user', lambda u, b: (type('Brand', (), {'name': 'Test Brand', 'description': 'Test Desc'}), None))
 
     # Mock model generation to return a JSON array with one malformed item
     class MockResponse:
@@ -102,7 +102,7 @@ def test_generate_tags_error(client, monkeypatch):
 
 def test_generate_seo_keywords_range_checks(client, monkeypatch):
     # Mock get_brand_for_user
-    monkeypatch.setattr('blueprints.generate.get_brand_for_user', lambda u, b: (type('Brand', (), {'name': 'Test Brand'}), None))
+    monkeypatch.setattr('blueprints.generate.get_brand_for_user', lambda u, b: (type('Brand', (), {'name': 'Test Brand', 'description': 'Test Desc'}), None))
 
     # Mock model generation to return out-of-range numerical values
     class MockResponse:
