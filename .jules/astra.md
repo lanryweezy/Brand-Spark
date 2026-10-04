@@ -85,3 +85,7 @@
 ## 2026-11-10 - Validate AI Output Ranges
 **Learning:** Checking for JSON array structure and proper types using `int()` and `str()` isn't fully protective if the values of the types can be arbitrary. Models can easily hallucinate negative search volumes or keyword difficulty scores greater than 100, which can leak into the UI causing confusing data displays.
 **Action:** When validating generated numeric values inside an AI output structure, always perform appropriate bounds/range checks before accepting the item. If the values are completely outside expected limits (e.g. `volume < 0`, `difficulty > 100`), drop the corrupted array item to prevent leaking out-of-range data.
+
+## 2023-11-12 - Prevent Context Hallucinations by Passing Complete Context
+**Learning:** Passing only a small piece of context (like just the brand name) to an AI generation task causes the model to hallucinate the rest of the missing context (like the brand's industry, purpose, or identity), leading to generic or inaccurate outputs.
+**Action:** Always include comprehensive, relevant context (such as appending `brand.description` along with `brand.name`) in generative prompts to anchor the AI's output and improve generation quality and relevance.
