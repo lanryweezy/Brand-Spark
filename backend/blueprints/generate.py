@@ -73,11 +73,14 @@ def safe_extract_text(response):
     ASTRA AI Quality Improvement:
     Safely extracts text from the Gemini response.
     The google.generativeai SDK raises a ValueError if the response is empty or blocked by safety filters.
-    Catching this explicitly provides clearer error signals (safety block vs network failure)
-    and allows for graceful fallbacks instead of causing 500 server errors.
+    Additionally, we explicitly check for whitespace-only hallucinated responses to prevent silent UI failures.
+    Catching this explicitly provides clearer error signals and allows for graceful fallbacks instead of raw 500s or empty text.
     """
     try:
-        return response.text
+        text = response.text
+        if not text or not text.strip():
+            raise ValueError("AI response was empty or whitespace-only")
+        return text
     except ValueError as e:
         print(f"AI response blocked by safety filters or empty: {e}")
         raise ValueError("AI response blocked by safety filters or empty") from e

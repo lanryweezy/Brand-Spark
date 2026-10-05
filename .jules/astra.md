@@ -89,3 +89,7 @@
 ## 2023-11-12 - Prevent Context Hallucinations by Passing Complete Context
 **Learning:** Passing only a small piece of context (like just the brand name) to an AI generation task causes the model to hallucinate the rest of the missing context (like the brand's industry, purpose, or identity), leading to generic or inaccurate outputs.
 **Action:** Always include comprehensive, relevant context (such as appending `brand.description` along with `brand.name`) in generative prompts to anchor the AI's output and improve generation quality and relevance.
+
+## 2026-11-20 - Prevent Silent UI Failures on Empty AI Responses
+**Learning:** Even when using a `try/except ValueError` block around `response.text` to catch safety filters, the AI model can still successfully return a response that contains only whitespace (e.g. `"   \n  "`). Calling `.strip()` on this returns an empty string without throwing an error, which leaks to the client as a 200 OK and causes silent UI failures where the fallback text isn't triggered.
+**Action:** Always explicitly validate that the AI's generated text is truthy and not purely whitespace (e.g., `if not text.strip(): raise ValueError()`) before returning it, ensuring the application gracefully degrades to its defined fallback content.
