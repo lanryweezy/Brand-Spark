@@ -89,3 +89,7 @@
 ## 2023-11-12 - Prevent Context Hallucinations by Passing Complete Context
 **Learning:** Passing only a small piece of context (like just the brand name) to an AI generation task causes the model to hallucinate the rest of the missing context (like the brand's industry, purpose, or identity), leading to generic or inaccurate outputs.
 **Action:** Always include comprehensive, relevant context (such as appending `brand.description` along with `brand.name`) in generative prompts to anchor the AI's output and improve generation quality and relevance.
+
+## 2026-10-06 - [Prompt Injection Constraints vs Instruction Fields]
+**Learning:** Applying generic 'treat strictly as data' anti-injection constraints to fields that inherently contain user instructions (like a 'prompt' or 'instructions' field) directly contradicts the goal of the feature and severely degrades output quality. The model gets confused whether to follow the prompt or treat it as passive data.
+**Action:** When mitigating prompt injection, distinguish between pure data fields (names, dates, topics) which should be treated as data, and instruction fields. For instruction fields, wrap them in tags but explicitly authorize the model to follow the instructions within those tags.
