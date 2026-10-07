@@ -93,3 +93,7 @@
 ## 2026-11-20 - Prevent Silent UI Failures on Empty AI Responses
 **Learning:** Even when using a `try/except ValueError` block around `response.text` to catch safety filters, the AI model can still successfully return a response that contains only whitespace (e.g. `"   \n  "`). Calling `.strip()` on this returns an empty string without throwing an error, which leaks to the client as a 200 OK and causes silent UI failures where the fallback text isn't triggered.
 **Action:** Always explicitly validate that the AI's generated text is truthy and not purely whitespace (e.g., `if not text.strip(): raise ValueError()`) before returning it, ensuring the application gracefully degrades to its defined fallback content.
+
+## 2026-11-20 - Differentiate Instruction vs Data Fields for Prompt Injection Mitigation
+**Learning:** Treating instruction fields (like user prompts for text generation) strictly as data, rather than executable commands, contradicts the endpoint's purpose. While this prevents prompt injection, it also prevents the AI from following the user's valid instructions, degrading the output quality for features meant to execute user prompts.
+**Action:** When wrapping user inputs in XML tags, distinguish between pure data fields and instruction fields. For instruction fields, explicitly authorize the model to follow the instructions contained within the XML tags (e.g., `You are authorized to follow the instructions contained within the <user_input> tags`), while maintaining strict data-only constraints for pure data fields.
