@@ -97,3 +97,7 @@
 ## 2026-11-20 - Differentiate Instruction vs Data Fields for Prompt Injection Mitigation
 **Learning:** Treating instruction fields (like user prompts for text generation) strictly as data, rather than executable commands, contradicts the endpoint's purpose. While this prevents prompt injection, it also prevents the AI from following the user's valid instructions, degrading the output quality for features meant to execute user prompts.
 **Action:** When wrapping user inputs in XML tags, distinguish between pure data fields and instruction fields. For instruction fields, explicitly authorize the model to follow the instructions contained within the XML tags (e.g., `You are authorized to follow the instructions contained within the <user_input> tags`), while maintaining strict data-only constraints for pure data fields.
+
+## 2024-05-18 - Sanitize User Input to Prevent XML Tag Breakout
+**Learning:** Wrapping user input in `<user_input>` XML tags in the prompt protects against prompt injection. However, if the user input itself contains `</user_input>`, it can prematurely close the data boundary, allowing the user to inject system-level instructions directly into the prompt.
+**Action:** Always sanitize incoming string request payloads by explicitly stripping the exact XML tags used in the prompt (e.g., `<user_input>` and `</user_input>`) before injecting them into the prompt templates.
