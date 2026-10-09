@@ -68,6 +68,23 @@ def get_brand_for_user(user_id: str, brand_id: str):
         return None, "Brand not found or access denied"
     return brand, None
 
+def sanitize_inputs(data):
+    """
+    ASTRA AI Quality Improvement:
+    Sanitizes all string values in the incoming request data to prevent XML tag breakout
+    prompt injections. By removing XML tags used in our prompts, we ensure malicious users
+    cannot break out of the `<user_input>` block to inject system-level overrides.
+    Works recursively on nested dicts and lists.
+    """
+    if isinstance(data, str):
+        return data.replace("</user_input>", "").replace("<user_input>", "")
+    elif isinstance(data, dict):
+        return {k: sanitize_inputs(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [sanitize_inputs(item) for item in data]
+    else:
+        return data
+
 def safe_extract_text(response):
     """
     ASTRA AI Quality Improvement:
@@ -115,6 +132,7 @@ def call_ai_with_retry(prompt, generation_config=None, request_options=None, max
 def generate_social_post():
     try:
         data = request.get_json() or {}
+        data = sanitize_inputs(data)
         SocialPostSchema().load(data)
     except ValidationError as ve:
         return jsonify({"error": "Validation failed", "details": ve.messages}), 400
@@ -167,6 +185,7 @@ Generate the post content only. Do not include markdown, preamble, or commentary
 def generate_text():
     try:
         data = request.get_json() or {}
+        data = sanitize_inputs(data)
         GenerateTextSchema().load(data)
     except ValidationError as ve:
         return jsonify({"error": "Validation failed", "details": ve.messages}), 400
@@ -223,6 +242,7 @@ Do not include markdown, preamble, or commentary.
 def generate_blog_ideas():
     try:
         data = request.get_json() or {}
+        data = sanitize_inputs(data)
         BlogIdeasSchema().load(data)
     except ValidationError as ve:
         return jsonify({"error": "Validation failed", "details": ve.messages}), 400
@@ -292,6 +312,7 @@ Respond ONLY with a valid JSON array of objects. Each object must have exactly t
 def generate_ad_copy():
     try:
         data = request.get_json() or {}
+        data = sanitize_inputs(data)
         AdCopySchema().load(data)
     except ValidationError as ve:
         return jsonify({"error": "Validation failed", "details": ve.messages}), 400
@@ -341,6 +362,7 @@ Return ONLY the ad copy text. Do not include markdown, preamble, or commentary.
 def generate_seo_keywords():
     try:
         data = request.get_json() or {}
+        data = sanitize_inputs(data)
         SEOKeywordsSchema().load(data)
     except ValidationError as ve:
         return jsonify({"error": "Validation failed", "details": ve.messages}), 400
@@ -433,6 +455,7 @@ Respond ONLY as a JSON array of objects, each with 'keyword' (string), 'volume' 
 def generate_email_campaign():
     try:
         data = request.get_json() or {}
+        data = sanitize_inputs(data)
         EmailCampaignSchema().load(data)
     except ValidationError as ve:
         return jsonify({"error": "Validation failed", "details": ve.messages}), 400
@@ -496,6 +519,7 @@ Respond ONLY as a JSON object with two string fields: 'subject' and 'body'.
 def generate_tags():
     try:
         data = request.get_json() or {}
+        data = sanitize_inputs(data)
         TagsSchema().load(data)
     except ValidationError as ve:
         return jsonify({"error": "Validation failed", "details": ve.messages}), 400
