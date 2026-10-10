@@ -120,7 +120,7 @@ def call_ai_with_retry(prompt, generation_config=None, request_options=None, max
         except Exception as e:
             last_exception = e
             # Google generative AI can wrap HTTP errors in standard Exceptions or google.api_core exceptions
-            if any(term in str(e) for term in ['429', '500', '503', 'TooManyRequests', 'InternalServerError', 'ServiceUnavailable', 'ResourceExhausted']):
+            if any(term in str(e) for term in ['429', '500', '503', '504', 'TooManyRequests', 'InternalServerError', 'ServiceUnavailable', 'ResourceExhausted', 'DeadlineExceeded', 'Timeout', 'GatewayTimeout']):
                 time.sleep(2 ** attempt)  # Exponential backoff: 1s, 2s, 4s
             else:
                 raise e # Don't retry on things like auth errors or 400 bad request
