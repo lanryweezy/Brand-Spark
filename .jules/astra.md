@@ -101,3 +101,7 @@
 ## 2024-05-18 - Sanitize User Input to Prevent XML Tag Breakout
 **Learning:** Wrapping user input in `<user_input>` XML tags in the prompt protects against prompt injection. However, if the user input itself contains `</user_input>`, it can prematurely close the data boundary, allowing the user to inject system-level instructions directly into the prompt.
 **Action:** Always sanitize incoming string request payloads by explicitly stripping the exact XML tags used in the prompt (e.g., `<user_input>` and `</user_input>`) before injecting them into the prompt templates.
+
+## 2024-10-25 - Timeout Error Handling Resilience
+**Learning:** Checking for standard HTTP 500/429 codes inside AI API wrappers does not catch timeout errors. Google Generative AI API calls can fail with `DeadlineExceeded`, `504 Gateway Timeout`, or simple `Timeout` exceptions during heavy load. If these are not included in the retry loop, the application fails immediately on a transient timeout instead of retrying gracefully.
+**Action:** When configuring exponential backoff for AI API calls, ensure that timeout-related exceptions (e.g., `DeadlineExceeded`, `504`, `GatewayTimeout`, `Timeout`) are explicitly caught and retried alongside standard rate-limiting (429) and server errors (500, 503).
