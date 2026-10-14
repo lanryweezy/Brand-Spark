@@ -95,12 +95,29 @@ def safe_extract_text(response):
     """
     try:
         text = response.text
-        if not text or not text.strip():
-            raise ValueError("AI response was empty or whitespace-only")
-        return text
     except ValueError as e:
-        print(f"AI response blocked by safety filters or empty: {e}")
-        raise ValueError("AI response blocked by safety filters or empty") from e
+        print(f"AI response blocked by safety filters: {e}")
+        raise ValueError("AI response blocked by safety filters") from e
+
+    if not text or not text.strip():
+        print("AI response was empty or whitespace-only")
+        raise ValueError("AI response was empty or whitespace-only")
+
+    # ASTRA AI Quality Improvement:
+    # Detect common AI conversational refusals to prevent leaking unstructured junk to the UI.
+    refusal_patterns = [
+        "i cannot fulfill this request",
+        "as an ai language model",
+        "i cannot generate",
+        "i am unable to",
+        "i'm unable to"
+    ]
+    text_lower = text.lower()
+    if any(pattern in text_lower for pattern in refusal_patterns):
+        print(f"AI response contained a conversational refusal: {text}")
+        raise ValueError("AI response contained a conversational refusal")
+
+    return text
 
 def call_ai_with_retry(prompt, generation_config=None, request_options=None, max_retries=3):
     """
