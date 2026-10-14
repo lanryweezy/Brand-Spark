@@ -247,6 +247,35 @@ def test_generate_ad_copy_error(client, monkeypatch):
     assert response.status_code == 200
     assert data == "Test Brand: Test Product — Test Points (Tone: Test Tone)"
 
+def test_generate_text_refusal(client, monkeypatch):
+    monkeypatch.setattr('blueprints.generate.get_brand_for_user', lambda u, b: (type('Brand', (), {'name': 'Test Brand', 'description': 'Test Desc'}), None))
+
+    class MockResponse:
+        @property
+        def text(self):
+            return "I am unable to fulfill this request because as an AI language model..."
+
+    class MockModel:
+        def generate_content(self, *args, **kwargs):
+            return MockResponse()
+
+    monkeypatch.setattr('blueprints.generate.model', MockModel())
+
+    with app.app_context():
+        access_token = create_access_token(identity="test_user")
+
+    response = client.post('/generate/text',
+        headers={"Authorization": f"Bearer {access_token}"},
+        json={
+            "brandId": "123",
+            "prompt": "Test Prompt"
+        }
+    )
+
+    data = response.get_json()
+    assert response.status_code == 200
+    assert "[Demo Fallback] Test Prompt" in data["generated_text"]
+
 def test_generate_text_empty_response(client, monkeypatch):
     monkeypatch.setattr('blueprints.generate.get_brand_for_user', lambda u, b: (type('Brand', (), {'name': 'Test Brand', 'description': 'Test Desc'}), None))
 

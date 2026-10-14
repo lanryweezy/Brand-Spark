@@ -105,3 +105,7 @@
 ## 2024-10-25 - Timeout Error Handling Resilience
 **Learning:** Checking for standard HTTP 500/429 codes inside AI API wrappers does not catch timeout errors. Google Generative AI API calls can fail with `DeadlineExceeded`, `504 Gateway Timeout`, or simple `Timeout` exceptions during heavy load. If these are not included in the retry loop, the application fails immediately on a transient timeout instead of retrying gracefully.
 **Action:** When configuring exponential backoff for AI API calls, ensure that timeout-related exceptions (e.g., `DeadlineExceeded`, `504`, `GatewayTimeout`, `Timeout`) are explicitly caught and retried alongside standard rate-limiting (429) and server errors (500, 503).
+
+## 2026-11-20 - Prevent Silent Leaks of Conversational Refusals
+**Learning:** For endpoints generating raw text, models will often return conversational refusals (e.g. "As an AI language model, I cannot fulfill this request") instead of adhering to the requested output format when triggered by sensitive inputs or edge cases. If this is not explicitly caught, the conversational junk leaks silently to the frontend as a successful 200 OK response.
+**Action:** When extracting text from AI responses, implement explicit checks for common conversational refusal patterns in the output string. If detected, raise an error to prevent unstructured junk from leaking to the UI and ensure the endpoint falls back gracefully.
