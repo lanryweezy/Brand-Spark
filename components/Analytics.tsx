@@ -17,6 +17,7 @@ import Button from './ui/Button';
 import { useToast } from '../hooks/useToast';
 import Modal from './ui/Modal';
 import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 
 // Mock data for analytics views to use. In a real app, this would be fetched from the backend.
 const mockAnalyticsData = {
@@ -129,7 +130,8 @@ const Analytics: React.FC = () => {
                 {isLoadingReport ? (
                     <div className="text-center p-12">Generating...</div>
                 ) : (
-                    <div className="prose prose-slate max-w-none max-h-[70vh] overflow-y-auto" dangerouslySetInnerHTML={{ __html: reportContent }} />
+                    // ASTRA AI Quality Improvement: Sanitize AI output before rendering HTML to prevent XSS.
+                    <div className="prose prose-slate max-w-none max-h-[70vh] overflow-y-auto" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(reportContent) }} />
                 )}
             </Modal>
         )}

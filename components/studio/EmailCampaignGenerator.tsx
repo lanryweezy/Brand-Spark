@@ -13,6 +13,7 @@ import SaveToCalendarButton from './common/SaveToCalendarButton';
 import AISuggestionButton from '../ui/AISuggestionButton';
 import SaveToAssetsButton from './common/SaveToAssetsButton';
 import { useToast } from '../../hooks/useToast';
+import DOMPurify from 'dompurify';
 
 const EmailCampaignGenerator: React.FC = () => {
   const { currentBrand } = useCurrentBrand();
@@ -119,7 +120,8 @@ baseTone: ${currentBrand?.baseTone}
         <h4 className="font-bold text-brand-text">Body</h4>
         <div 
             className="mt-1 p-2 border rounded prose prose-sm max-w-none" 
-            dangerouslySetInnerHTML={{ __html: result.body }}
+            // ASTRA AI Quality Improvement: Sanitize AI output before rendering HTML to prevent XSS.
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(result.body) }}
         />
          <CopyButton textToCopy={result.body} />
       </div>
