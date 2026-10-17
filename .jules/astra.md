@@ -113,3 +113,7 @@
 ## 2024-11-20 - Robust Exception Checking for AI Retries
 **Learning:** Google Generative AI API calls can fail with timeout errors such as `DeadlineExceeded`, `Timeout`, or `GatewayTimeout`. If exception strings are checked using `str(e)`, some standard exceptions might simply print their message (e.g. "Mocked timeout") without including their exception class name, causing retry mechanisms based purely on `str(e)` to fail unexpectedly.
 **Action:** When configuring retry loops (e.g. `call_ai_with_retry`) to catch specific exception names, do not rely solely on checking if the exception name appears in `str(e)`. Always explicitly check the exception class name as well (e.g., `type(e).__name__ in ['DeadlineExceeded', 'Timeout', 'GatewayTimeout']`) to ensure timeouts and other specifically targeted transient errors are correctly caught and retried.
+
+## 2026-10-17 - Prevent XSS from AI-Generated HTML
+**Learning:** AI models can generate malicious HTML/JS if they are tricked into returning malicious payloads (e.g., via prompt injection or unconstrained markdown rendering). Rendering this raw output in the UI using `dangerouslySetInnerHTML` exposes the application to Cross-Site Scripting (XSS) attacks.
+**Action:** Always sanitize AI-generated content (especially HTML or parsed markdown) using a robust library like DOMPurify before rendering it in the UI with `dangerouslySetInnerHTML`.

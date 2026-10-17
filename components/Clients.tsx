@@ -21,6 +21,7 @@ import { marked } from 'marked';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Tabs from './ui/Tabs';
+import DOMPurify from 'dompurify';
 import { motion } from 'framer-motion';
 
 // Dropdown component for export options
@@ -282,7 +283,8 @@ const Clients: React.FC = () => {
                                 <h4 className="text-xl font-bold text-brand-text mb-4">Client Performance Report</h4>
                                 <div 
                                     className="prose prose-slate max-w-none prose-h2:text-2xl prose-h2:font-bold prose-h2:mb-4 prose-h3:text-lg prose-h3:font-semibold"
-                                    dangerouslySetInnerHTML={{ __html: reportHtml }}
+                                    // ASTRA AI Quality Improvement: Sanitize AI output before rendering HTML to prevent XSS.
+                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(reportHtml) }}
                                 />
                             </div>
                         </div>
