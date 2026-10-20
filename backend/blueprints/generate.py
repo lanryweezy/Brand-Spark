@@ -385,14 +385,20 @@ def generate_blog_ideas():
         if not isinstance(parsed_data, list):
             raise ValueError("AI output is not a JSON array")
 
+        # ASTRA AI Quality Improvement:
+        # Enforce .strip() and truthiness checks on generated JSON string fields
+        # to prevent hallucinated whitespace strings from leaking to the UI as blank data.
         valid_ideas = []
         for item in parsed_data:
             if isinstance(item, dict) and 'title' in item and 'outline' in item:
                 if isinstance(item['title'], str) and isinstance(item['outline'], str):
-                    valid_ideas.append({
-                        "title": item['title'],
-                        "outline": item['outline']
-                    })
+                    title = item['title'].strip()
+                    outline = item['outline'].strip()
+                    if title and outline:
+                        valid_ideas.append({
+                            "title": title,
+                            "outline": outline
+                        })
 
         if not valid_ideas:
             raise ValueError("No valid blog ideas found in response")
@@ -497,9 +503,17 @@ def generate_seo_keywords():
         for item in parsed:
             if isinstance(item, dict) and 'keyword' in item and 'volume' in item and 'difficulty' in item:
                 try:
-                    keyword = item.get("keyword", "")
-                    note = item.get("note", "")
-                    if not isinstance(keyword, str) or not isinstance(note, str):
+                    keyword_val = item.get("keyword", "")
+                    note_val = item.get("note", "")
+                    if not isinstance(keyword_val, str) or not isinstance(note_val, str):
+                        continue
+
+                    # ASTRA AI Quality Improvement:
+                    # Enforce .strip() and truthiness on primary content field (keyword)
+                    # to prevent silent blank UI rows. Note field can be empty.
+                    keyword = keyword_val.strip()
+                    note = note_val.strip()
+                    if not keyword:
                         continue
 
                     volume = int(item.get("volume", 0))
@@ -580,9 +594,17 @@ def generate_email_campaign():
         if not isinstance(parsed['subject'], str) or not isinstance(parsed['body'], str):
             raise ValueError("AI output contains hallucinated nested structures instead of strings")
 
+        # ASTRA AI Quality Improvement:
+        # Enforce .strip() and truthiness checks on generated JSON string fields
+        # to prevent hallucinated whitespace strings from leaking to the UI as blank data.
+        subject = parsed['subject'].strip()
+        body = parsed['body'].strip()
+        if not subject or not body:
+            raise ValueError("AI generated empty string values for required fields")
+
         return jsonify({
-            "subject": parsed['subject'],
-            "body": parsed['body']
+            "subject": subject,
+            "body": body
         })
     except Exception as e:
         print(f"AI Error in generate_email_campaign: {e}")
@@ -627,7 +649,7 @@ def generate_tags():
         if not isinstance(parsed, list):
             raise ValueError("AI output is not a JSON array")
 
-        valid_tags = [item for item in parsed if isinstance(item, str)]
+        valid_tags = [item.strip() for item in parsed if isinstance(item, str) and item.strip()]
         if not valid_tags:
             raise ValueError("No valid string tags found in response")
 
