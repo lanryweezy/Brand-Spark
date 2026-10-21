@@ -613,6 +613,11 @@ def generate_email_campaign():
             "body": "Could not generate email content correctly. Please try again."
         })
 
+# A simple bounded cache to prevent unbounded memory growth.
+import collections
+TAGS_CACHE = collections.OrderedDict()
+MAX_CACHE_SIZE = 1000
+
 @generate_bp.route("/tags", methods=["POST"])
 @jwt_required()
 def generate_tags():
@@ -622,6 +627,10 @@ def generate_tags():
         TagsSchema().load(data)
     except ValidationError as ve:
         return jsonify({"error": "Validation failed", "details": ve.messages}), 400
+
+    cache_key = (data.get('type', ''), data.get('content', ''))
+    if cache_key in TAGS_CACHE:
+        return jsonify(TAGS_CACHE[cache_key])
 
     # No brand context needed here; simple fallback is fine
     if not model:
@@ -653,6 +662,9 @@ def generate_tags():
         if not valid_tags:
             raise ValueError("No valid string tags found in response")
 
+        TAGS_CACHE[cache_key] = valid_tags
+        if len(TAGS_CACHE) > MAX_CACHE_SIZE:
+            TAGS_CACHE.popitem(last=False)
         return jsonify(valid_tags)
     except Exception as e:
         print(f"AI Error in generate_tags: {e}")
