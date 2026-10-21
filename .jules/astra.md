@@ -121,3 +121,7 @@
 ## 2026-12-05 - Prevent Silent UI Data Gaps on Empty JSON Field Values
 **Learning:** Checking for JSON structure and proper types (like `isinstance(value, str)`) isn't fully protective if the string values are empty or purely whitespace. Models can occasionally hallucinate valid JSON structures but with empty string values (e.g., `{"title": " ", "outline": ""}`). This passes structure checks but leaks empty data into the UI, causing blank rows or missing content blocks.
 **Action:** When validating generated string values inside an AI output JSON structure (like arrays or objects), always perform `.strip()` and check for truthiness before accepting the item. If the values are empty, drop the corrupted item or raise an error to prevent leaking blank data to the client.
+
+## 2026-12-07 - Response caching for deterministic AI prompts
+**Learning:** For AI features with fully deterministic or near-deterministic inputs like `generate_tags` (which only takes `content_type` and `content`), calling the model repeatedly for the same inputs is unnecessary and incurs redundant latency and token costs.
+**Action:** Implement simple application-level caching (e.g. storing results in a dictionary indexed by input data fields) for deterministic AI endpoints so repeated calls are served instantaneously without hitting the model.
