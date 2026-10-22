@@ -125,3 +125,7 @@
 ## 2026-12-07 - Response caching for deterministic AI prompts
 **Learning:** For AI features with fully deterministic or near-deterministic inputs like `generate_tags` (which only takes `content_type` and `content`), calling the model repeatedly for the same inputs is unnecessary and incurs redundant latency and token costs.
 **Action:** Implement simple application-level caching (e.g. storing results in a dictionary indexed by input data fields) for deterministic AI endpoints so repeated calls are served instantaneously without hitting the model.
+
+## 2024-10-25 - Explicit HTML Formatting Instruction for Rendered Fields
+**Learning:** If an AI endpoint's output field is rendered in the UI using `dangerouslySetInnerHTML`, but the prompt does not explicitly instruct the model to use HTML tags, the model may return plaintext (with `\n` newlines). Since HTML ignores `\n` outside of `<pre>` tags, this results in a single, unformatted wall of text in the UI, ruining the presentation of multi-paragraph content like emails or articles.
+**Action:** Whenever a generated field is intended to be rendered as HTML, explicitly instruct the model in the prompt to format that specific field using semantic HTML tags (e.g. `<p>`, `<strong>`, `<br>`) and explicitly forbid markdown, ensuring proper formatting in the client.
