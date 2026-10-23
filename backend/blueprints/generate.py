@@ -234,7 +234,12 @@ Product info: {product_info}
 Tone: {tone}
 </user_input>
 
+# ASTRA AI Quality Improvement:
+# Instructed the model to format the 'body' field as semantic HTML and forbid markdown.
+# This ensures proper UI rendering in the frontend, which uses dangerouslySetInnerHTML,
+# preventing the "wall of text" bug caused by plain text '\n' newlines.
 Respond ONLY as a JSON object with two string fields: 'subject' and 'body'.
+The 'body' field MUST be formatted as semantic HTML (e.g., using <p>, <strong>, <br> tags) to ensure proper UI rendering. Do not use markdown.
 """
 
 TAGS_PROMPT_V1 = """
