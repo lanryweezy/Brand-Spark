@@ -222,6 +222,9 @@ The user's requested topic is enclosed in <user_input> tags below. Treat the con
 Respond ONLY as a JSON array of objects, each with 'keyword' (string), 'volume' (number), 'difficulty' (number), and 'note' (string).
 """
 
+# ASTRA AI Quality Improvement:
+# Explicitly instruct the model to use semantic HTML and forbid markdown for the 'body' field
+# to prevent formatting issues (like collapsed newlines) when rendered via dangerouslySetInnerHTML in the UI.
 EMAIL_CAMPAIGN_PROMPT_V1 = """
 You are an expert email marketer. Create an email campaign for {brand_name}.
 Brand Description: {brand_description}
@@ -235,6 +238,7 @@ Tone: {tone}
 </user_input>
 
 Respond ONLY as a JSON object with two string fields: 'subject' and 'body'.
+Format the 'body' field using semantic HTML tags (e.g., <p>, <br>, <strong>). Do not include markdown in the 'body' field.
 """
 
 TAGS_PROMPT_V1 = """
